@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-ka%5d)=1pn-6y&e21ikq6gj(x6s803yjwaa!f_(pzwux06j1+!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "corsheaders",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -126,12 +128,7 @@ MAILERS = {
     },
 }
 
-# --- Nawi ---
-if "corsheaders" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("corsheaders")
-if "corsheaders.middleware.CorsMiddleware" not in MIDDLEWARE:
-    MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
-
+# Origenes permitidos para el frontend durante el desarrollo.
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
