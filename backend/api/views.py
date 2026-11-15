@@ -28,8 +28,8 @@ def lista_objetos(request):
             "slug": slug,
             "nombre": o["nombre"],
             "tipo": o["tipo"],
-            "estado": d["estado"] if d else "sin_datos",
-            "cantidad_cuadros": len(d["cuadros"]) if d else 0,
+            "estado": d.get("estado", "ok") if d else "sin_datos",
+            "cantidad_cuadros": len(d.get("cuadros", [])) if d else 0,
         })
     return JsonResponse(salida, safe=False)
 
