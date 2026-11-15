@@ -70,6 +70,14 @@ const tituloSinCuadros = computed(() => (
     : 'No hay cuadros para mostrar de este objeto'
 ));
 const hayCuadrosReales = computed(() => frames.value.some((item) => item.illustrative === false));
+// El panel del latido solo aparece si hay curva que mostrar: un objeto sin
+// mediciones de brillo no estrena un panel vacío (el gráfico igual sabe
+// defenderse con su propio estado vacío).
+const mostrarLatido = computed(() => (
+  Boolean(selectedObject.value)
+  && esVariable.value
+  && (latido.value.puntos.length > 0 || latido.value.estado === 'loading')
+));
 
 // Lo que se puede afirmar según el estado de la fuente. 'pending' no se disfraza
 // de datos del backend: se avisa que no hay nada conectado.
@@ -316,9 +324,9 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
             <div class="viewer-toolbar"><div><span class="eyebrow">CAMPO CELESTE</span><h2>{{ loading ? 'Cargando catálogo…' : 'Catálogo no disponible' }}</h2></div></div>
             <div class="sky-stage" style="display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center"><p style="max-width: 46ch; margin: 0; color: var(--text-secondary); font-size: 13px">{{ loadError || 'Preparando los objetos de demostración.' }}</p></div>
           </div>
-          <section v-if="esVariable && !loading && !loadError && selectedObject" class="latido-panel panel" aria-labelledby="latido-titulo">
+          <section v-if="mostrarLatido && !loading && !loadError" class="latido-panel panel" aria-labelledby="latido-titulo">
             <div class="latido-head"><div><span class="eyebrow">LATIDO</span><h2 id="latido-titulo">Curva de brillo</h2></div><span class="latido-chip">{{ selectedObject.tag }}</span></div>
-            <p class="latido-intro">Brillo por fecha, tal como lo entrega el backend. Nawi no recalcula ni corrige estos valores.</p>
+            <p class="latido-intro">{{ latido.puntos.length }} mediciones de brillo por fecha, tal como las entrega el backend. Nawi no recalcula ni corrige estos valores.</p>
             <LatidoChart :puntos="latido.puntos" :nombre="selectedObject.name" :motivo="latido.motivo" :cargando="latido.estado === 'loading'" />
           </section>
           <div class="below-viewer"><span><i class="bi bi-info-circle" /> {{ ready ? selectedObject.demoUse : 'Esta experiencia está en desarrollo.' }} <span class="caption-divider">·</span> {{ dataSourceNote }}</span><span class="keyboard-hint">NAVEGÁ CON <kbd>←</kbd> <kbd>→</kbd></span></div>

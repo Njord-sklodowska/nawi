@@ -75,13 +75,15 @@ export function formatFrameDate(value) {
 
 /**
  * Longitud de onda -> rótulo de banda.
- * Si el backend no publicó el dato (hoy pasa en los 7 cuadros de Barnard, que
- * traen `longitud_onda_um: null`), se dice eso mismo: no se inventa 0.75 μm.
+ *
+ * El backend publica `longitud_onda_um` real por cuadro (4.9565, 4.4778…), así
+ * que la banda se muestra como esa longitud de onda con dos decimales.
+ * Si el dato faltara, se dice "Banda sin dato": no se inventa un valor.
  */
 export function formatBand(longitudOndaUm) {
   const um = Number(longitudOndaUm);
   if (!Number.isFinite(um) || um <= 0) return BAND_SIN_DATO;
-  return `Banda · ${um.toFixed(2)} μm`;
+  return `${um.toFixed(2)} μm`;
 }
 
 /** Resuelve la URL del cuadro contra la base del backend (prefijo /media/). */
@@ -147,9 +149,14 @@ export function toFramesVista(cuadros, { apiBase } = {}) {
 /**
  * Punto de la curva de brillo (latido) del backend -> punto de la vista.
  *
- * Se descartan los puntos sin fecha (no se puede ubicar un punto en el tiempo
- * sin fecha) y los valores ausentes quedan en null en vez de 0: un flujo que el
- * backend no publicó no es "flujo cero".
+ * El backend publica:
+ *   { fecha, longitud_onda_um, brillo, brillo_error, unidad }
+ * La vista venía esperando `flujo` y `error`, así que se aceptan los dos juegos
+ * de nombres (`brillo ?? flujo`, `brillo_error ?? error`) y se conservan las dos
+ * claves: así nada de la interfaz depende de cuál publicó el backend.
+ *
+ * Se descarta el punto sin fecha (no se puede ubicar en el tiempo) y el punto
+ * sin valor (no hay nada que dibujar); un valor ausente nunca se convierte en 0.
  */
 function numeroONull(valor) {
   if (valor === null || valor === undefined || valor === '') return null;
@@ -157,16 +164,35 @@ function numeroONull(valor) {
   return Number.isFinite(numero) ? numero : null;
 }
 
+/** Unidad de brillo publicada por el backend; 'Jy' es el default acordado. */
+export const UNIDAD_BRILLO_POR_DEFECTO = 'Jy';
+
+function unidadONull(valor) {
+  return typeof valor === 'string' && valor.trim() ? valor.trim() : null;
+}
+
 export function toLatidoVista(puntos) {
   if (!Array.isArray(puntos)) return [];
   return puntos
-    .filter((punto) => punto && typeof punto.fecha === 'string' && punto.fecha.trim())
-    .map((punto) => Object.freeze({
-      fecha: punto.fecha.trim(),
-      flujo: numeroONull(punto.flujo),
-      error: numeroONull(punto.error),
-      longitudOndaUm: numeroONull(punto.longitud_onda_um),
-    }))
+    .map((punto) => {
+      if (!punto || typeof punto !== 'object') return null;
+      const fecha = typeof punto.fecha === 'string' ? punto.fecha.trim() : '';
+      if (!fecha) return null;
+
+      const brillo = numeroONull(punto.brillo ?? punto.flujo);
+      if (brillo === null) return null;
+
+      return Object.freeze({
+        fecha,
+        // contrato de la vista (con alias para no romper al gráfico)
+        brillo,
+        flujo: brillo,
+        error: numeroONull(punto.brillo_error ?? punto.error),
+        unidad: unidadONull(punto.unidad) ?? UNIDAD_BRILLO_POR_DEFECTO,
+        longitudOndaUm: numeroONull(punto.longitud_onda_um),
+      });
+    })
+    .filter(Boolean)
     .sort((a, b) => a.fecha.localeCompare(b.fecha));
 }
 

@@ -1487,3 +1487,11 @@ i.bi { line-height: 1; }
   line-height: 1.5;
   color: var(--text-muted);
 }
+
+/* Barras de error del Latido: el error que informa el backend, a escala real. */
+.latido-error {
+  stroke: var(--ice);
+  stroke-width: 1;
+  stroke-opacity: 0.9;
+  stroke-linecap: round;
+}
