@@ -1672,3 +1672,182 @@ i.bi { line-height: 1; }
   .zoom-mode { height: 28px; padding: 0 8px; font-size: 10px; }
   .escala-aviso { right: 10px; bottom: 12px; padding: 5px 7px; font-size: 8px; }
 }
+
+/* --- Rastro (D2) y "En palabras simples" (D4) ----------------------------- */
+/* Solo tokens de la paleta: ningún hex fuera de :root. */
+.rastro-panel {
+  margin-top: 12px;
+  padding: 18px 20px 16px;
+}
+
+.rastro-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rastro-head h2 {
+  margin-top: 7px;
+  font: 600 18px Manrope, sans-serif;
+  letter-spacing: -0.35px;
+  color: var(--text-title);
+}
+
+.rastro-chip {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-void);
+  font: 500 10px 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+.rastro-intro {
+  margin: 10px 0 14px;
+  max-width: 72ch;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* Métricas como lista de definiciones: cada número con su etiqueta. */
+.rastro-metricas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.rastro-metrica {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-void);
+}
+
+.rastro-metrica-ancha { grid-column: 1 / -1; }
+
+.rastro-metrica dt {
+  margin-bottom: 6px;
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.rastro-metrica dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0;
+}
+
+.rastro-valor {
+  font: 600 17px 'DM Mono', monospace;
+  letter-spacing: -0.01em;
+  color: var(--text-title);
+}
+
+.rastro-nota {
+  font: 400 10.5px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+/* Validación del método: medido vs publicado. */
+.rastro-validacion {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-void);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.rastro-validacion i { margin-top: 1px; color: var(--text-muted); }
+
+.rastro-validacion.is-ok {
+  border-left-color: var(--icon-success);
+}
+
+.rastro-validacion.is-ok i { color: var(--icon-success); }
+
+.rastro-validacion.is-off {
+  border-left-color: var(--danger);
+}
+
+.rastro-validacion.is-off i { color: var(--danger); }
+
+/* Frase del backend, citada tal cual. */
+.rastro-frase {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--nebula);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+}
+
+.rastro-frase-texto {
+  margin: 0 0 10px;
+  max-width: 74ch;
+  font: 400 14px/1.6 'DM Sans', sans-serif;
+  color: var(--text-title);
+}
+
+.rastro-frase-fuente {
+  font: 400 10px 'DM Mono', monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.rastro-frase-fuente::before { content: '— '; }
+
+/* Trayectoria sobre la imagen: mismo sistema de coordenadas que el recorte. */
+.trayectoria {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.trayectoria-linea {
+  stroke: var(--star);
+  stroke-width: 1.6;
+  /* Sólida y no punteada: el desplazamiento real es de ~1,7 px nativos, así que
+     los guiones se comían la línea entera. Los extremos van con puntos. */
+  stroke-opacity: 0.9;
+  stroke-linecap: round;
+  fill: none;
+  /* Grosor constante en pantalla: 1.6 px lógicos a cualquier zoom. */
+  vector-effect: non-scaling-stroke;
+}
+
+.trayectoria-extremo {
+  fill: var(--star);
+  fill-opacity: 0.9;
+  stroke: var(--bg-void);
+  stroke-width: 0.6;
+  vector-effect: non-scaling-stroke;
+}
+
+@media (max-width: 680px) {
+  .rastro-panel { padding: 14px; }
+  .rastro-head h2 { font-size: 16px; }
+  .rastro-metricas { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 8px; }
+  .rastro-valor { font-size: 15px; }
+  .rastro-frase { padding: 12px; }
+  .rastro-frase-texto { font-size: 13px; }
+}

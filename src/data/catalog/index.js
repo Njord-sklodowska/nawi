@@ -12,10 +12,13 @@
  * Contrato que debe cumplir cualquier fuente (`source`):
  *
  *   source.mode          'mock' | 'api'
- *   source.status        'demo' | 'live' | 'pending'
+ *   source.status        'demo' | 'live' | 'pending' | 'error'
  *                          demo    = datos de demostración, no observaciones
- *                          live    = datos reales servidos por el backend
- *                          pending = la fuente existe pero no está conectada
+ *                          live    = la última consulta al backend salió bien
+ *                          pending = todavía no se consultó al backend
+ *                          error   = la última consulta falló (red, 404, no-JSON)
+ *                        En la práctica el estado lo calcula ./sourceInfo.js a
+ *                        partir de apiHealth; la fuente no lo fija a mano.
  *   source.label         nombre corto para mostrar en la interfaz
  *   source.illustrative  true | false | null
  *                          true  = los datos NO son observaciones reales
@@ -68,6 +71,7 @@
  */
 
 import { toObjetoVista } from './adapters.js';
+import { DATA_SOURCE_INFO as SOURCE_INFO, conEstado, initSourceInfo } from './sourceInfo.js';
 import { apiSource } from './sources/api.source.js';
 import { mockSource } from './sources/mock.source.js';
 
@@ -88,34 +92,35 @@ export const DATA_SOURCE_MODE = Object.hasOwn(SOURCES, requestedMode) ? requeste
 
 const source = SOURCES[DATA_SOURCE_MODE];
 
+// El estado de la fuente (demo | live | pending | error) vive en ./sourceInfo.js
+// y se actualiza con cada consulta, a partir de apiHealth de la fuente api.
+initSourceInfo(source);
+
 /**
  * Fuente activa envuelta por el adaptador: cualquier `source` devuelve el shape
  * del backend (`slug`, `ra_deg`…) y acá se traduce al modelo de vista. Así la
  * vista no sabe si los datos vienen del mock o de la API.
+ *
+ * Cada llamada pasa por `conEstado`, que refleja el resultado en DATA_SOURCE_INFO.
  */
 export const catalog = Object.freeze({
   mode: source.mode,
-  status: source.status,
+  get status() {
+    return SOURCE_INFO.status;
+  },
   label: source.label,
   illustrative: source.illustrative,
-  async listObjects() {
-    const objetos = await source.listObjects();
-    return objetos.map(toObjetoVista);
-  },
-  listFrames: (slug) => source.listFrames(slug),
+  listObjects: conEstado(async () => (await source.listObjects()).map(toObjetoVista)),
+  listFrames: conEstado((slug) => source.listFrames(slug)),
   /** Detalle de la ficha, incluido el latido (curva de brillo). */
-  getDetalleObjeto: (slug) => source.getDetalleObjeto(slug),
+  getDetalleObjeto: conEstado((slug) => source.getDetalleObjeto(slug)),
 });
 
 /**
- * Metadatos para la interfaz. `status` es la fuente de verdad de lo que se
- * puede afirmar: 'pending' nunca se presenta como datos del backend.
+ * Metadatos para la interfaz (store reactivo de ./sourceInfo.js).
+ * `status` es la fuente de verdad de lo que se puede afirmar:
+ *   'demo' | 'live' | 'pending' | 'error'
  */
-export const DATA_SOURCE_INFO = Object.freeze({
-  mode: catalog.mode,
-  status: catalog.status,
-  label: catalog.label,
-  illustrative: catalog.illustrative,
-});
+export const DATA_SOURCE_INFO = SOURCE_INFO;
 
 export default catalog;

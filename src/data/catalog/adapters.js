@@ -209,21 +209,33 @@ const esObjeto = (valor) => Boolean(valor) && typeof valor === 'object' && !Arra
 /**
  * Ficha completa del backend -> detalle que consume la vista.
  *
- * Honestidad: si el objeto es 'sin_datos' o el latido viene vacío, se devuelve
- * `latido: []` y `estado: 'sin_datos'`. No se rellena la curva con nada.
+ * Honestidad:
+ *  - `estado` describe los DATOS DEL OBJETO, no la curva de brillo: si hay
+ *    cuadros, el objeto es 'ok' aunque el latido venga vacío (caso Barnard, 9
+ *    cuadros y sin curva de brillo). Solo es 'sin_datos' si no hay ningún cuadro.
+ *  - El mensaje sobre la curva vacía va en `motivoLatido`; `motivo` queda para
+ *    el motivo que publica el backend sobre el objeto.
+ *  - `latido: []` cuando no hay puntos: no se rellena la curva con nada.
  */
 export function toDetalleVista(datos, { apiBase, motivoSinLatido = 'El backend todavía no publicó la curva de brillo.' } = {}) {
   if (!esObjeto(datos)) return null;
+  const cuadros = toFramesVista(datos.cuadros, { apiBase, tamanoPx: datos.tamano_px });
   const latido = toLatidoVista(datos.latido);
-  const sinLatido = datos.estado === 'sin_datos' || latido.length === 0;
   const motivoBackend = typeof datos.motivo === 'string' ? datos.motivo.trim() : '';
+  const sinCuadros = cuadros.length === 0;
+  const sinLatido = latido.length === 0;
 
   return Object.freeze({
     slug: typeof datos.slug === 'string' && datos.slug.trim() ? datos.slug.trim() : null,
-    estado: sinLatido ? 'sin_datos' : (datos.estado ?? 'ok'),
-    motivo: motivoBackend || (sinLatido ? motivoSinLatido : ''),
-    latido: sinLatido ? [] : latido,
-    cuadros: toFramesVista(datos.cuadros, { apiBase, tamanoPx: datos.tamano_px }),
+    // Estado del objeto: depende de los cuadros, no de la curva de brillo.
+    estado: sinCuadros ? 'sin_datos' : 'ok',
+    // Motivo que publica el backend sobre el objeto (no sobre el latido).
+    motivo: motivoBackend,
+    latido,
+    // Estado propio de la curva de brillo, para no mezclarlo con el del objeto.
+    latidoEstado: sinLatido ? 'sin_datos' : 'ok',
+    motivoLatido: sinLatido ? (motivoBackend || motivoSinLatido) : '',
+    cuadros,
     // Metadatos reales del recorte: campo, escala y tamaño en píxeles.
     metadatos: Object.freeze({
       fovArcmin: numeroONull(datos.fov_arcmin),

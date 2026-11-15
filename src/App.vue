@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { DATA_SOURCE_INFO, catalog } from './data/catalog/index.js';
 import LatidoChart from './components/LatidoChart.vue';
+import RastroPanel from './components/RastroPanel.vue';
 
 // Tema claro/oscuro: arranca según la preferencia del sistema y se recuerda en localStorage.
 const THEME_KEY = 'nawi-theme';
@@ -43,6 +44,8 @@ const framesInfo = ref({ estado: '', motivo: '' });
 const latido = ref({ estado: 'idle', motivo: '', puntos: [] });
 // Metadatos reales del recorte (campo, escala, tamaño) que publica el backend.
 const metadatos = ref(null);
+// Detalle crudo de la ficha: de acá sale el bloque `rastro` (D2).
+const detalle = ref(null);
 const loading = ref(true);
 const loadError = ref('');
 
@@ -90,6 +93,44 @@ const marcadorReal = computed(() => {
   return { left: `${left.toFixed(2)}%`, top: `${top.toFixed(2)}%` };
 });
 
+// Rastro (D2): desplazamiento medido por el backend entre el primer y el último
+// cuadro. Solo Barnard lo trae con valores; el resto devuelve nulos, y en ese
+// caso el panel no se muestra (nada de guiones vacíos).
+const rastro = computed(() => detalle.value?.rastro ?? null);
+const mostrarRastro = computed(() => {
+  const valor = rastro.value?.desplazamiento_arcsec ?? rastro.value?.desplazamientoArcsec;
+  if (valor === null || valor === undefined || valor === '') return false;
+  return Number.isFinite(Number(valor));
+});
+
+const tamanoRecorte = computed(() => {
+  const tam = frame.value?.tamanoPx ?? metadatos.value?.tamanoPx;
+  return Number.isFinite(tam) && tam > 0 ? tam : 58;
+});
+
+/**
+ * Trayectoria esperada: recta entre la posición del primer y del último cuadro
+ * (`pos_esperada_px`, la misma que alimenta la cruz). El SVG comparte el sistema
+ * de coordenadas nativo de la imagen (58x58 px), así que escala con el zoom y no
+ * cambia con el modo suavizado. Es la recta entre dos posiciones informadas, no
+ * un ajuste ni un suavizado de la trayectoria.
+ */
+const trayectoria = computed(() => {
+  if (!mostrarRastro.value || frames.value.length < 2) return null;
+  const primero = frames.value[0]?.posEsperadaPx;
+  const ultimo = frames.value[frames.value.length - 1]?.posEsperadaPx;
+  if (!primero || !ultimo) return null;
+  if (![primero.x, primero.y, ultimo.x, ultimo.y].every((valor) => Number.isFinite(valor))) return null;
+  return {
+    x1: primero.x,
+    y1: primero.y,
+    x2: ultimo.x,
+    y2: ultimo.y,
+    desde: frames.value[0].date,
+    hasta: frames.value[frames.value.length - 1].date,
+  };
+});
+
 const fichaTecnica = computed(() => {
   const m = metadatos.value;
   if (!m) return [];
@@ -127,23 +168,30 @@ const mostrarLatido = computed(() => (
 
 // Lo que se puede afirmar según el estado de la fuente. 'pending' no se disfraza
 // de datos del backend: se avisa que no hay nada conectado.
+// DATA_SOURCE_INFO es un store reactivo: el estado cambia con cada consulta al
+// backend ('pending' al arrancar, 'live' si respondió, 'error' si falló). Por eso
+// los textos se calculan en un computed y no una sola vez al montar.
 const SOURCE_COPY = {
-  demo: {
+  demo: () => ({
     title: 'Catálogo de demostración',
     note: `${DATA_SOURCE_INFO.label} · cifras ilustrativas, no validadas.`,
-  },
-  live: {
+  }),
+  live: () => ({
     title: 'Catálogo del backend',
     note: `${DATA_SOURCE_INFO.label} · datos del backend.`,
-  },
-  pending: {
+  }),
+  pending: () => ({
     title: 'Catálogo sin conectar',
-    note: `${DATA_SOURCE_INFO.label} no está conectada: no hay datos que mostrar.`,
-  },
+    note: `${DATA_SOURCE_INFO.label} · todavía no se consultó el backend.`,
+  }),
+  error: () => ({
+    title: 'Catálogo no disponible',
+    note: DATA_SOURCE_INFO.error || 'El backend no respondió a la última consulta.',
+  }),
 };
 
-const sourceCopy = SOURCE_COPY[DATA_SOURCE_INFO.status] ?? SOURCE_COPY.pending;
-const dataSourceNote = sourceCopy.note;
+const sourceCopy = computed(() => (SOURCE_COPY[DATA_SOURCE_INFO.status] ?? SOURCE_COPY.pending)());
+const dataSourceNote = computed(() => sourceCopy.value.note);
 
 // El backend puede devolver los cuadros como array o como objeto con
 // { estado, motivo, cuadros }: se aceptan las dos formas.
@@ -207,11 +255,15 @@ function normalizarLatido(payload) {
  */
 async function loadDetalle() {
   metadatos.value = null;
+  detalle.value = null;
   const buscaLatido = esVariable.value;
   latido.value = { estado: buscaLatido ? 'loading' : 'idle', motivo: '', puntos: [] };
   if (!objectId.value) return;
 
-  const aplicar = (payload) => {
+  const aplicar = (payload, deCatalogo = false) => {
+    // El rastro vive en la ficha del backend, no en el listado: solo se guarda
+    // el payload que vino del catálogo para no pisarlo con el objeto de la lista.
+    if (deCatalogo && payload) detalle.value = payload;
     if (payload?.metadatos) metadatos.value = payload.metadatos;
     if (!buscaLatido) return false;
     const respuesta = normalizarLatido(payload);
@@ -225,7 +277,7 @@ async function loadDetalle() {
   try {
     for (const acceso of accesosLatido()) {
       const payload = await catalog[acceso](objectId.value);
-      if (aplicar(payload)) return;
+      if (aplicar(payload, true)) return;
       // Sin latido, pero con metadatos ya alcanza: no se siguen probando métodos.
       if (payload?.metadatos) return;
     }
@@ -353,11 +405,18 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
             <div v-if="fichaTecnica.length" class="viewer-meta" aria-label="Metadatos del recorte">
               <span v-for="chip in fichaTecnica" :key="chip" class="meta-chip"><i class="bi bi-rulers" /> {{ chip }}</span>
               <span v-if="marcadorReal" class="meta-chip"><i class="bi bi-crosshair2" /> cruz: posición esperada</span>
+              <span v-if="trayectoria" class="meta-chip"><i class="bi bi-slash-lg" /> trayectoria: primer → último cuadro</span>
               <span class="meta-origen">según el backend</span>
             </div>
             <div class="sky-stage" :class="{ comparison: compare, 'is-real': !frame.illustrative, 'is-suavizado': suavizado && !frame.illustrative }" :style="!frame.illustrative ? { '--zoom': zoomActivo } : null">
               <div v-if="!frame.illustrative" class="pixel-marco">
                 <img class="pixel-frame" :src="frame.url" :alt="`Recorte de ${selectedObject.name} del ${frame.date} en ${frame.band}`" />
+                <svg v-if="trayectoria" class="trayectoria" :viewBox="`0 0 ${tamanoRecorte} ${tamanoRecorte}`" role="img" :aria-label="`Trayectoria esperada entre el primer y el último cuadro (${trayectoria.desde} a ${trayectoria.hasta})`">
+                  <title>Trayectoria esperada entre el primer y el último cuadro ({{ trayectoria.desde }} a {{ trayectoria.hasta }})</title>
+                  <line class="trayectoria-linea" :x1="trayectoria.x1" :y1="trayectoria.y1" :x2="trayectoria.x2" :y2="trayectoria.y2" />
+                  <circle class="trayectoria-extremo" :cx="trayectoria.x1" :cy="trayectoria.y1" r="1.1" />
+                  <circle class="trayectoria-extremo" :cx="trayectoria.x2" :cy="trayectoria.y2" r="1.1" />
+                </svg>
                 <div v-if="marcadorReal" class="target-marker is-real" :style="marcadorReal"><span /><i /></div>
               </div>
               <div v-else class="image-layer" :style="{ backgroundImage: `url(${frame.url})` }" />
@@ -397,6 +456,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
             <div class="viewer-toolbar"><div><span class="eyebrow">CAMPO CELESTE</span><h2>{{ loading ? 'Cargando catálogo…' : 'Catálogo no disponible' }}</h2></div></div>
             <div class="sky-stage" style="display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center"><p style="max-width: 46ch; margin: 0; color: var(--text-secondary); font-size: 13px">{{ loadError || 'Preparando los objetos de demostración.' }}</p></div>
           </div>
+          <RastroPanel v-if="selectedObject" :rastro="rastro" :nombre="selectedObject.name" />
           <section v-if="mostrarLatido && !loading && !loadError" class="latido-panel panel" aria-labelledby="latido-titulo">
             <div class="latido-head"><div><span class="eyebrow">LATIDO</span><h2 id="latido-titulo">Curva de brillo</h2></div><span class="latido-chip">{{ selectedObject.tag }}</span></div>
             <p class="latido-intro">{{ latido.puntos.length }} mediciones de brillo por fecha, tal como las entrega el backend. Nawi no recalcula ni corrige estos valores.</p>

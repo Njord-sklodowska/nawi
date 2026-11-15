@@ -91,6 +91,22 @@ VITE_API_BASE=http://127.0.0.1:8010
   pantalla (no cae al mock ni inventa datos).
 - `.env.local` **no se versiona** (está en `.gitignore`). Solo se versiona `.env.example`.
 
+### Estado de la fuente (para la interfaz)
+
+`DATA_SOURCE_INFO` (en `src/data/catalog/sourceInfo.js`) es un store **reactivo** que refleja
+la realidad de la última consulta, derivada de `apiHealth` de la fuente `api`: no es un valor
+fijo. `DATA_SOURCE_INFO.status` puede tomar cuatro valores:
+
+| `status` | Cuándo | Texto que debería mostrar la UI |
+|---|---|---|
+| `demo` | fuente `mock` | "Catálogo de demostración" · cifras ilustrativas |
+| `live` | la última consulta al backend salió bien | "Catálogo del backend" · datos del backend |
+| `pending` | todavía no se consultó el backend | "Catálogo sin conectar" · todavía no se consultó |
+| `error` | la última consulta falló | "Catálogo no disponible" + `DATA_SOURCE_INFO.error` |
+
+El store también expone `error` (mensaje en español de la última falla), `contacted`,
+`updatedAt` y `base`, para que la interfaz pueda ser precisa sin inventar nada.
+
 ---
 
 ## Endpoints disponibles
@@ -133,16 +149,18 @@ valor falta, la interfaz lo dice ("Banda sin dato") en lugar de completarlo.
 | Objeto | Cuadros | Longitud de onda | Latido | Calidad del recorte |
 |---|---|---|---|---|
 | Estrella de Barnard | 9 | 4,39 – 4,92 μm | sin datos | ok |
-| WISE 0855-0714 | 7 | sin dato | sin datos | marcada dudosa |
-| Epsilon Indi B | 2 | sin dato | sin datos | marcada dudosa |
+| WISE 0855-0714 | 7 | 4,41 – 4,97 μm | sin datos | marcada dudosa |
+| Epsilon Indi B | 2 | 4,52 – 4,66 μm | sin datos | marcada dudosa |
 | RW Aurigae | 7 | 4,41 – 4,96 μm | **7 puntos** (Jy) | ok |
-| R Draconis | 3 | sin dato | sin datos | mixta |
+| R Draconis | 12 | 4,42 – 4,81 μm | sin datos | mixta |
 
-- Total: **28 recortes**, todos de **58 × 58 px** con **6,15″ por píxel** (campo de 4′).
+- Total: **37 recortes**, todos de **58 × 58 px** con **6,15″ por píxel** (campo de 5,95′).
 - El visor avisa cuando el backend marca un cuadro con **calidad dudosa**.
 - `rastro`, `revelar` y `conocido` todavía vienen vacíos en los cinco objetos.
-- Cuando un objeto no tiene curva de brillo, el detalle responde `estado: "sin_datos"` y
-  `latido: []`; no se inventan puntos.
+- `latido` (curva de brillo) hoy solo existe para **RW Aurigae**; cuando un objeto no tiene
+  curva, el detalle responde `latido: []` y `latidoEstado: "sin_datos"` sin inventar puntos.
+  Que el latido esté vacío **no** significa que el objeto no tenga datos: el `estado` del
+  objeto depende de sus cuadros.
 
 ## Uso de inteligencia artificial
 
@@ -163,5 +181,5 @@ el código no debería reutilizarse sin consultar a sus autores.
 - `doc/plan-de-trabajo-nawi-v2.md` — plan de trabajo y reparto de roles.
 - `doc/estructura-backend-nawi-simple.md` — cómo está armado el backend.
 - `doc/HALLAZGOS_FASE1.md` — hallazgos de la primera fase de datos.
-- `doc/contrato-api.md` — propuesta original del contrato (histórico: hoy la API ya está
-  implementada, ver la tabla de endpoints de este README).
+- `doc/contrato-api.md` — contrato real de la API (endpoints, campos, códigos de error y
+  cómo los consume el frontend).
