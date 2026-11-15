@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-ka%5d)=1pn-6y&e21ikq6gj(x6s803yjwaa!f_(pzwux06j1+!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "corsheaders",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -125,3 +127,21 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# --- Nawi ---
+# CORS: el frontend corre en el puerto 5178 (Vite), además del 5173 histórico.
+if "corsheaders" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("corsheaders")
+if "corsheaders.middleware.CorsMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5178",
+    "http://127.0.0.1:5178",
+]
+
+# Archivos servidos por Django en desarrollo: /media/barnard/frames/0000.png
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "data"

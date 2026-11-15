@@ -4,7 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -k -n front,back -c cyan,magenta \"npm:dev:front\" \"npm:dev:back\"",
+    "dev:front": "vite",
+    "dev:back": "backend/.venv/bin/python backend/manage.py runserver 8010",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -15,6 +17,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "concurrently": "^10.0.7",
     "vite": "^6.0.5"
   }
 }

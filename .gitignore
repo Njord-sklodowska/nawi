@@ -1,7 +1,27 @@
-node_modules/
-dist/
+# --- Entorno y dependencias ---
 .env
 .DS_Store
+node_modules/
+
+# --- Python / backend ---
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# --- Datos y archivos científicos ---
+*.fits
+backend/data/raw/
+
+# Base de datos local
+db.sqlite3
+
+# --- Frontend (Vite) ---
+dist/
+.vite/
+
+# --- Otros ---
+nawi/
 
 # Documentos de trabajo que no deben publicarse
 doc/*.pdf
