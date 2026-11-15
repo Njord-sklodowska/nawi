@@ -17,3 +17,7 @@ db.sqlite3
 
 # Otros
 nawi/
+
+# Frontend (Vite)
+dist/
+.vite/
