@@ -125,3 +125,17 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# --- Nawi ---
+if "corsheaders" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("corsheaders")
+if "corsheaders.middleware.CorsMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "data"
