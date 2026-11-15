@@ -1,0 +1,27 @@
+[
+  {
+    "slug": "barnard", "nombre": "Estrella de Barnard", "tipo": "estrella_movimiento_propio", "rol": "principal",
+    "ra_deg": 269.45207696, "dec_deg": 4.69336497, "epoca": "J2000",
+    "pm_ra_cosdec_mas_yr": -801.551, "pm_dec_mas_yr": 10362.394, "fov_arcmin": 4
+  },
+  {
+    "slug": "wise-0855", "nombre": "WISE 0855-0714", "tipo": "enana_marron_Y", "rol": "secundario",
+    "ra_deg": 133.81890825, "dec_deg": -7.247048, "epoca": "J2000",
+    "pm_ra_cosdec_mas_yr": -8123.7, "pm_dec_mas_yr": 673.2, "fov_arcmin": 4
+  },
+  {
+    "slug": "epsilon-indi-b", "nombre": "Epsilon Indi B (par de enanas marrones)", "tipo": "enana_marron", "rol": "secundario",
+    "ra_deg": 331.04414659, "dec_deg": -56.7828442, "epoca": "J2000",
+    "pm_ra_cosdec_mas_yr": 3981.977, "pm_dec_mas_yr": -2466.832, "fov_arcmin": 4
+  },
+  {
+    "slug": "rw-aurigae", "nombre": "RW Aurigae", "tipo": "estrella_variable", "rol": "secundario",
+    "ra_deg": 76.95652603, "dec_deg": 30.40143817, "epoca": "J2000",
+    "pm_ra_cosdec_mas_yr": 7.23, "pm_dec_mas_yr": -20.33, "fov_arcmin": 4
+  },
+  {
+    "slug": "r-draconis", "nombre": "R Draconis", "tipo": "estrella_variable", "rol": "secundario",
+    "ra_deg": 248.16761083, "dec_deg": 66.75497942, "epoca": "J2000",
+    "pm_ra_cosdec_mas_yr": -20.643, "pm_dec_mas_yr": 6.149, "fov_arcmin": 4
+  }
+]
