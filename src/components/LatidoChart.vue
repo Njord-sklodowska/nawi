@@ -254,7 +254,7 @@ const descripcion = computed(() => {
   const hasta = fechaCorta(puntos[puntos.length - 1].t, cruzaAnios.value);
   const rango = `${desde} y ${hasta}`;
   const medida = puntos.length === 1 ? `${puntos.length} medición (${rango})` : `${puntos.length} mediciones entre ${rango}`;
-  return `Curva de brillo${quien}: ${medida}. Brillo en ${unidadBrillo.value}, con el error que informa el backend. Valores sin recálculo.`;
+  return `Curva de brillo${quien}: ${medida}. Brillo en ${unidadBrillo.value}, con el error informado. Valores sin recálculo.`;
 });
 
 const hayError = computed(() => puntosValidos.value.some((p) => p.error !== null && p.error > 0));
@@ -263,7 +263,7 @@ const erroresInvisibles = computed(() => puntosValidos.value.some((p) => p.error
 const etiquetasOmitidas = computed(() => puntosValidos.value.some((p) => p.lambda !== null && !p.etiqueta));
 
 const pie = computed(() => {
-  const partes = [`Cada punto es una medición del backend, con brillo en ${unidadBrillo.value}.`];
+  const partes = [`Cada punto es una medición registrada, con brillo en ${unidadBrillo.value}.`];
   if (hayLambda.value) {
     partes.push(etiquetasOmitidas.value
       ? 'La etiqueta indica la longitud de onda; las que no entran en el gráfico están en el tooltip.'
@@ -272,7 +272,7 @@ const pie = computed(() => {
   if (hayError.value) {
     partes.push(erroresInvisibles.value
       ? 'La barra vertical es el error informado; a esta escala es más fina que un píxel, el valor exacto está en el tooltip.'
-      : 'La barra vertical es el error informado por el backend.');
+      : 'La barra vertical es el error informado de cada medición.');
   }
   return partes.join(' ');
 });
@@ -291,8 +291,8 @@ const hayLambda = computed(() => puntosValidos.value.some((p) => p.lambda !== nu
       <i class="bi bi-activity" />
       <div>
         <strong>Sin datos de brillo todavía</strong>
-        <p v-if="motivo">El backend informó: {{ motivo }}</p>
-        <p v-else>Cuando el backend publique las mediciones, la curva aparece acá. No se dibujan ejes ni puntos inventados.</p>
+        <p v-if="motivo">Motivo informado: {{ motivo }}</p>
+        <p v-else>Cuando haya mediciones disponibles, la curva aparece acá. No se dibujan ejes ni puntos inventados.</p>
       </div>
     </div>
 

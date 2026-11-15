@@ -217,7 +217,7 @@ const esObjeto = (valor) => Boolean(valor) && typeof valor === 'object' && !Arra
  *    el motivo que publica el backend sobre el objeto.
  *  - `latido: []` cuando no hay puntos: no se rellena la curva con nada.
  */
-export function toDetalleVista(datos, { apiBase, motivoSinLatido = 'El backend todavía no publicó la curva de brillo.' } = {}) {
+export function toDetalleVista(datos, { apiBase, motivoSinLatido = 'Todavía no hay una curva de brillo disponible.' } = {}) {
   if (!esObjeto(datos)) return null;
   const cuadros = toFramesVista(datos.cuadros, { apiBase, tamanoPx: datos.tamano_px });
   const latido = toLatidoVista(datos.latido);
@@ -265,7 +265,7 @@ function coordenadas(raw) {
     status: 'catalogo',
     statusLabel: 'CATÁLOGO',
     note:
-      'Coordenadas publicadas por el backend (SIMBAD/Gaia DR3). ' +
+      'Coordenadas publicadas por SIMBAD/Gaia DR3. ' +
       'El frontend las muestra sin verificarlas ni recalcularlas.',
   });
 }
@@ -276,13 +276,13 @@ function coordenadas(raw) {
  */
 function usoHonesto(raw, extra) {
   if (raw.estado === 'sin_datos') {
-    return 'El backend todavía no precalculó cuadros para este objeto.';
+    return 'Todavía no hay cuadros procesados para este objeto.';
   }
   if (extra.uso) return extra.uso;
   if (raw.estado === 'ok') {
     const total = Number(raw.cantidad_cuadros);
     if (Number.isFinite(total) && total > 0) {
-      return `${total} cuadros precalculados por el backend.`;
+      return `${total} cuadros procesados.`;
     }
   }
   return '';

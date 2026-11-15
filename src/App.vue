@@ -191,16 +191,16 @@ const SOURCE_COPY = {
     note: `${DATA_SOURCE_INFO.label} · cifras ilustrativas, no validadas.`,
   }),
   live: () => ({
-    title: 'Catálogo del backend',
-    note: `${DATA_SOURCE_INFO.label} · datos del backend.`,
+    title: 'Catálogo de observaciones',
+    note: `${DATA_SOURCE_INFO.label} · observaciones de la misión.`,
   }),
   pending: () => ({
     title: 'Catálogo sin conectar',
-    note: `${DATA_SOURCE_INFO.label} · todavía no se consultó el backend.`,
+    note: `${DATA_SOURCE_INFO.label} · todavía no se consultaron los datos.`,
   }),
   error: () => ({
     title: 'Catálogo no disponible',
-    note: DATA_SOURCE_INFO.error || 'El backend no respondió a la última consulta.',
+    note: DATA_SOURCE_INFO.error || 'No pudimos actualizar los datos en la última consulta.',
   }),
 };
 
@@ -421,12 +421,12 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
               <span v-for="chip in fichaTecnica" :key="chip" class="meta-chip"><i class="bi bi-rulers" /> {{ chip }}</span>
               <span v-if="marcadorReal" class="meta-chip"><i class="bi bi-crosshair2" /> cruz: posición esperada</span>
               <span v-if="trayectoria" class="meta-chip"><i class="bi bi-slash-lg" /> trayectoria: primer → último cuadro</span>
-              <span class="meta-origen">según el backend</span>
+              <span class="meta-origen">según los datos de la misión</span>
             </div>
             <div v-if="motivoConCuadros" class="viewer-aviso" role="note">
               <i class="bi bi-exclamation-triangle" aria-hidden="true" />
               <div class="viewer-aviso-copy">
-                <span class="viewer-aviso-label">Advertencia del backend</span>
+                <span class="viewer-aviso-label">Advertencia</span>
                 <p class="viewer-aviso-texto">{{ motivoConCuadros }}</p>
               </div>
             </div>
@@ -444,7 +444,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
               <div v-else class="image-layer" :style="{ backgroundImage: `url(${frame.url})` }" />
               <div class="sky-vignette" />
               <div class="sky-grid" />
-              <div class="image-caption"><span class="caption-dot" /> {{ frame.illustrative ? 'IMAGEN ILUSTRATIVA · DATOS REALES PENDIENTES' : 'DATOS DEL BACKEND' }}</div>
+              <div class="image-caption"><span class="caption-dot" /> {{ frame.illustrative ? 'IMAGEN ILUSTRATIVA · DATOS REALES PENDIENTES' : 'DATOS REALES' }}</div>
               <div v-if="selectedObject.coordinates" class="coordinate-label" :title="selectedObject.coordinates.note"><i class="bi bi-exclamation-triangle" /> {{ selectedObject.coordinates.ra }} <span>/</span> {{ selectedObject.coordinates.dec }} · {{ selectedObject.coordinates.statusLabel }}</div>
               <div v-else class="coordinate-label"><i class="bi bi-hourglass-split" /> COORDENADAS PENDIENTES <span>/</span> NO VALIDADAS</div>
               <template v-if="frame.illustrative">
@@ -453,7 +453,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
               </template>
               <div v-if="compare" class="compare-wipe" :class="{ 'is-real': !previousFrame.illustrative }" :style="previousFrame.illustrative ? { backgroundImage: `url(${previousFrame.url})` } : null"><img v-if="!previousFrame.illustrative" class="pixel-frame" :src="previousFrame.url" alt="" /><span class="wipe-label">ANTERIOR · {{ previousFrame.date }}{{ previousFrame.illustrative ? ' · ILUSTRATIVO' : '' }}</span><span class="wipe-line" /></div>
               <div v-if="!frame.illustrative && suavizado" class="escala-aviso"><i class="bi bi-water" /> interpolado · no son píxeles originales</div>
-              <div class="image-date"><span>{{ frame.date }}</span><small>{{ frame.band }}</small><small v-if="frame.calidadOk === false" class="frame-calidad">calidad marcada como dudosa por el backend</small></div>
+              <div class="image-date"><span>{{ frame.date }}</span><small>{{ frame.band }}</small><small v-if="frame.calidadOk === false" class="frame-calidad">calidad marcada como dudosa</small></div>
             </div>
             <div class="timeline">
               <div class="timeline-top"><span class="timeline-title"><i class="bi bi-clock-history" /> {{ hayCuadrosReales ? 'LÍNEA DE TIEMPO' : 'LÍNEA DE TIEMPO ILUSTRATIVA' }}</span><span class="frame-counter">CUADRO <b>{{ String(frameIndex + 1).padStart(2, '0') }}</b> <span>/ {{ String(frames.length).padStart(2, '0') }}</span></span></div>
@@ -468,8 +468,8 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
               <span class="viewer-empty-icon"><i class="bi bi-camera-video-off" /></span>
               <div>
                 <h3>{{ tituloSinCuadros }}</h3>
-                <p v-if="motivoSinCuadros" class="viewer-empty-motivo">Motivo informado por el backend: {{ motivoSinCuadros }}</p>
-                <p v-else class="viewer-empty-motivo">El backend no informó un motivo. Preferimos no mostrar imágenes de relleno para que no se confundan con datos.</p>
+                <p v-if="motivoSinCuadros" class="viewer-empty-motivo">Motivo informado: {{ motivoSinCuadros }}</p>
+                <p v-else class="viewer-empty-motivo">No hay un motivo informado. Preferimos no mostrar imágenes de relleno para que no se confundan con datos.</p>
                 <p class="viewer-empty-meta"><span class="viewer-empty-chip">{{ selectedObject.kind }}</span><span v-if="estadoSinCuadros" class="viewer-empty-chip">estado: {{ estadoSinCuadros }}</span><span v-if="selectedObject.coordinates" class="viewer-empty-chip">{{ selectedObject.coordinates.statusLabel }}</span></p>
               </div>
             </div>
@@ -481,7 +481,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
           <RastroPanel v-if="selectedObject" :rastro="rastro" :nombre="selectedObject.name" />
           <section v-if="mostrarLatido && !loading && !loadError" class="latido-panel panel" aria-labelledby="latido-titulo">
             <div class="latido-head"><div><span class="eyebrow">LATIDO</span><h2 id="latido-titulo">Curva de brillo</h2></div><span class="latido-chip">{{ selectedObject.tag }}</span></div>
-            <p class="latido-intro">{{ latido.puntos.length }} mediciones de brillo por fecha, tal como las entrega el backend. Nawi no recalcula ni corrige estos valores.</p>
+            <p class="latido-intro">{{ latido.puntos.length }} mediciones de brillo por fecha, tal como las entrega la misión. Nawi no recalcula ni corrige estos valores.</p>
             <LatidoChart :puntos="latido.puntos" :nombre="selectedObject.name" :motivo="latido.motivo" :cargando="latido.estado === 'loading'" />
           </section>
           <div class="below-viewer"><span><i class="bi bi-info-circle" /> {{ ready ? selectedObject.demoUse : 'Esta experiencia está en desarrollo.' }} <span class="caption-divider">·</span> {{ dataSourceNote }}</span><span class="keyboard-hint">NAVEGÁ CON <kbd>←</kbd> <kbd>→</kbd></span></div>

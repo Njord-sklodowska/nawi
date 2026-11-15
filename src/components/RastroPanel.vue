@@ -81,7 +81,7 @@ const fechas = computed(() => {
     </header>
 
     <p class="rastro-intro">
-      Del primer al último cuadro, medido por el backend sobre los recortes alineados. Nawi muestra esos
+      Del primer al último cuadro, medido sobre los recortes alineados. Nawi muestra esos
       valores sin recalcularlos.
     </p>
 
@@ -95,7 +95,7 @@ const fechas = computed(() => {
       </div>
       <div v-if="datos.direccion !== null" class="rastro-metrica">
         <dt>Dirección</dt>
-        <dd><strong class="rastro-valor">{{ formatear(datos.direccion) }}°</strong><span class="rastro-nota">ángulo del backend</span></dd>
+        <dd><strong class="rastro-valor">{{ formatear(datos.direccion) }}°</strong><span class="rastro-nota">ángulo medido</span></dd>
       </div>
       <div v-if="datos.medido !== null" class="rastro-metrica">
         <dt>Movimiento propio medido</dt>
@@ -123,7 +123,7 @@ const fechas = computed(() => {
         informada (±{{ formatear(datos.incertidumbre) }}″): la medición no coincide con el catálogo.
       </span>
       <span v-else>
-        Diferencia con el valor publicado: {{ formatear(comparacion.diferencia) }}″/año. El backend no informó
+        Diferencia con el valor publicado: {{ formatear(comparacion.diferencia) }}″/año. No se informó
         incertidumbre, así que no se afirma si coinciden.
       </span>
     </p>
@@ -131,7 +131,7 @@ const fechas = computed(() => {
     <blockquote v-if="datos.frase" class="rastro-frase">
       <p class="rastro-frase-texto">{{ datos.frase }}</p>
       <footer class="rastro-frase-fuente">
-        En palabras simples · redactada por el backend con los valores medidos
+        En palabras simples · redactada con los valores medidos
       </footer>
     </blockquote>
   </section>

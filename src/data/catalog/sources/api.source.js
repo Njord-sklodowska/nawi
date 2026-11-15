@@ -90,9 +90,8 @@ async function requestJson(path, descripcion) {
   } catch (error) {
     const abortado = error?.name === 'AbortError';
     const mensaje = abortado
-      ? `El backend no respondió en ${TIMEOUT_MS / 1000} segundos al pedir ${descripcion} (${url}).`
-      : `No se pudo conectar con el backend en ${API_BASE} al pedir ${descripcion}. ` +
-        'Verificá que el servidor esté corriendo (cd backend && ./.venv/bin/python manage.py runserver 8010).';
+      ? `La consulta de ${descripcion} tardó más de ${TIMEOUT_MS / 1000} segundos.`
+      : `No pudimos obtener ${descripcion}. Revisá tu conexión e intentá de nuevo.`;
     marcarContacto(false, mensaje);
     throw new Error(mensaje);
   } finally {
@@ -116,16 +115,16 @@ async function requestJson(path, descripcion) {
   if (!response.ok) {
     const detalle = mensajeDelCuerpo(cuerpo);
     const mensaje = response.status === 404
-      ? `El backend no encontró ${descripcion} (HTTP 404).${detalle ? ` ${detalle}` : ''}`
-      : `El backend respondió HTTP ${response.status} al pedir ${descripcion}.${detalle ? ` ${detalle}` : ''}`;
+      ? `No encontramos ${descripcion}.${detalle ? ` ${detalle}` : ''}`
+      : `No pudimos obtener ${descripcion} (código ${response.status}).${detalle ? ` ${detalle}` : ''}`;
     marcarContacto(false, mensaje);
     throw new Error(mensaje);
   }
 
   if (!parseoOk || (!esJson(response) && cuerpo === null)) {
     const mensaje =
-      `El backend devolvió una respuesta que no es JSON al pedir ${descripcion} ` +
-      `(content-type: ${response.headers.get('content-type') || 'desconocido'}).`;
+      `Recibimos una respuesta inesperada al pedir ${descripcion}. ` +
+      'Probá de nuevo en unos instantes.';
     marcarContacto(false, mensaje);
     throw new Error(mensaje);
   }
@@ -184,7 +183,7 @@ export const apiSource = Object.freeze({
   // La fuente es el backend real: lo que devuelve son sus datos. Si el backend
   // falla, la promesa rechaza y la interfaz muestra el error; no hay relleno.
   status: 'live',
-  label: 'API del backend',
+  label: 'Observaciones SPHEREx',
   illustrative: false,
   apiBase: API_BASE,
 
@@ -192,7 +191,7 @@ export const apiSource = Object.freeze({
   async listObjects() {
     const datos = await requestJson('/api/objetos/', 'el catálogo de objetos');
     if (!Array.isArray(datos)) {
-      const mensaje = 'El backend devolvió el catálogo con un formato inesperado: se esperaba un array de objetos.';
+      const mensaje = 'Los datos del catálogo llegaron con un formato inesperado.';
       marcarContacto(false, mensaje);
       throw new Error(mensaje);
     }
@@ -213,7 +212,7 @@ export const apiSource = Object.freeze({
       `el objeto «${slug.trim()}»`,
     );
     if (!datos || typeof datos !== 'object' || Array.isArray(datos)) {
-      const mensaje = `El backend devolvió la ficha de «${slug.trim()}» con un formato inesperado.`;
+      const mensaje = `Los datos de «${slug.trim()}» llegaron con un formato inesperado.`;
       marcarContacto(false, mensaje);
       throw new Error(mensaje);
     }
@@ -243,7 +242,7 @@ export const apiSource = Object.freeze({
     );
     const detalle = toDetalleVista(datos, { apiBase: API_BASE });
     if (!detalle) {
-      const mensaje = `El backend devolvió la ficha de «${slug.trim()}» con un formato inesperado.`;
+      const mensaje = `Los datos de «${slug.trim()}» llegaron con un formato inesperado.`;
       marcarContacto(false, mensaje);
       throw new Error(mensaje);
     }
