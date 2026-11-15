@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1d2021" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="description" content="Nawi: explora observaciones infrarrojas de SPHEREx a través del tiempo." />
+    <title>Nawi — Explorador SPHEREx</title>
+    <script>
+      // Tema oscuro por defecto; restaura el claro solo si se eligió explícitamente.
+      (function () {
+        try {
+          var saved = localStorage.getItem('nawi-theme');
+          var theme = saved === 'light' ? 'light' : 'dark';
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', theme === 'light' ? '#ebdbb2' : '#1d2021');
+        } catch (error) { /* sin localStorage: queda el tema oscuro por defecto */ }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
