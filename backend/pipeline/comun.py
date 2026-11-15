@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from astropy.coordinates import SkyCoord, Distance
 from astropy.time import Time
-import astropy.units as u
+
 import warnings
 warnings.filterwarnings("ignore")
 

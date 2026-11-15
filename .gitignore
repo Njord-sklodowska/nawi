@@ -16,6 +16,7 @@ backend/data/raw/
 
 # Base de datos local
 db.sqlite3
+backend/db.sqlite3
 
 # --- Frontend (Vite) ---
 dist/
@@ -23,6 +24,7 @@ dist/
 
 # --- Otros ---
 nawi/
+.commandcode/
 
 # Documentos de trabajo que no deben publicarse
 doc/*.pdf

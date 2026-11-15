@@ -106,12 +106,15 @@ for i, c in enumerate(cuadros):
     pos = c0.apply_space_motion(new_obstime=Time(c["fecha"]))
     x, y = [float(t) for t in dest.world_to_pixel(pos)]
     snr = snr_en(img, x, y)
+    cobertura_pct = round(float(np.isfinite(img).mean()) * 100, 1)
+
     datos_json["cuadros"].append(dict(
         fecha=c["fecha"][:19] + "Z",
         url=f"/media/{slug}/frames/{nombre}",
         longitud_onda_um=c["lam"],
         ancho_banda_um=c["ancho"],
-        calidad_ok=bool(np.isfinite(img).mean() >= 0.9),
+        cobertura_pct=cobertura_pct,
+        calidad_ok=bool(cobertura_pct >= 90),
         pos_esperada_px={"x": round(x, 2), "y": round(N - 1 - y, 2)},
         snr_en_posicion=None if snr is None else round(snr, 1),
     ))

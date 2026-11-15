@@ -1,0 +1,114 @@
+{
+  "slug": "wise-0855",
+  "nombre": "WISE 0855-0714",
+  "tipo": "enana_marron_Y",
+  "centro": {
+    "ra_deg": 133.759765,
+    "dec_deg": -7.242182
+  },
+  "fov_arcmin": 5.95,
+  "pixel_arcsec": 6.15,
+  "tamano_px": 58,
+  "estado": "ok",
+  "motivo": "",
+  "cuadros": [
+    {
+      "fecha": "2025-05-05T16:49:00Z",
+      "url": "/media/wise-0855/frames/0000.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 89.8,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 27.63,
+        "y": 28.57
+      },
+      "snr_en_posicion": 1.3
+    },
+    {
+      "fecha": "2025-11-10T07:08:21Z",
+      "url": "/media/wise-0855/frames/0001.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 87.6,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.31,
+        "y": 28.52
+      },
+      "snr_en_posicion": 5.3
+    },
+    {
+      "fecha": "2025-12-12T06:48:13Z",
+      "url": "/media/wise-0855/frames/0002.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 87.5,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.43,
+        "y": 28.51
+      },
+      "snr_en_posicion": 3.9
+    },
+    {
+      "fecha": "2026-04-21T04:45:58Z",
+      "url": "/media/wise-0855/frames/0003.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 89.3,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.9,
+        "y": 28.47
+      },
+      "snr_en_posicion": 4.7
+    },
+    {
+      "fecha": "2026-04-30T18:30:56Z",
+      "url": "/media/wise-0855/frames/0004.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 88.4,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.93,
+        "y": 28.46
+      },
+      "snr_en_posicion": 5.1
+    },
+    {
+      "fecha": "2026-05-08T23:38:58Z",
+      "url": "/media/wise-0855/frames/0005.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 88.6,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.96,
+        "y": 28.46
+      },
+      "snr_en_posicion": 4.6
+    },
+    {
+      "fecha": "2026-05-11T02:19:42Z",
+      "url": "/media/wise-0855/frames/0006.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 88.2,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.97,
+        "y": 28.46
+      },
+      "snr_en_posicion": 2.7
+    }
+  ],
+  "latido": [],
+  "rastro": {
+    "desplazamiento_arcsec": null,
+    "direccion_deg": null,
+    "incertidumbre_arcsec": null,
+    "pm_publicado_arcsec_yr": null
+  },
+  "revelar": {
+    "snr_vs_cuadros": []
+  },
+  "conocido": {
+    "estado": "sin_datos",
+    "coincidencias": []
+  }
+}
