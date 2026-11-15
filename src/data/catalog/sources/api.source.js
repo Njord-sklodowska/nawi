@@ -218,7 +218,7 @@ export const apiSource = Object.freeze({
       throw new Error(mensaje);
     }
     const cuadros = Array.isArray(datos.cuadros) ? datos.cuadros : [];
-    return toFramesVista(cuadros, { apiBase: API_BASE });
+    return toFramesVista(cuadros, { apiBase: API_BASE, tamanoPx: datos.tamano_px });
   },
 
   /**

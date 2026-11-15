@@ -106,6 +106,12 @@ function posicionEsperada(valor) {
   return Object.freeze({ x, y });
 }
 
+/** Lado del recorte en píxeles (el backend lo publica por objeto). */
+function tamanoEnPx(valor) {
+  const numero = Number(valor);
+  return Number.isFinite(numero) && numero > 0 ? numero : null;
+}
+
 /**
  * Cuadro del backend -> cuadro de la vista.
  *
@@ -113,7 +119,7 @@ function posicionEsperada(valor) {
  * modo API: un cuadro existe únicamente si el backend lo devolvió, así que nunca
  * se etiqueta como real un cuadro que no vino de una respuesta 200.
  */
-export function toFrameVista(cuadro, { apiBase } = {}) {
+export function toFrameVista(cuadro, { apiBase, tamanoPx } = {}) {
   if (!cuadro || typeof cuadro !== 'object') return null;
   const url = resolveFrameUrl(cuadro.url, apiBase);
   if (!url) return null;
@@ -130,6 +136,8 @@ export function toFrameVista(cuadro, { apiBase } = {}) {
     longitudOndaUm: Number.isFinite(um) && um > 0 ? um : null,
     calidadOk: cuadro.calidad_ok === true,
     posEsperadaPx: posicionEsperada(cuadro.pos_esperada_px),
+    // Tamaño del recorte, necesario para ubicar la posición en la imagen.
+    tamanoPx: tamanoEnPx(tamanoPx),
   });
 }
 
@@ -137,12 +145,12 @@ export function toFrameVista(cuadro, { apiBase } = {}) {
  * Serie de cuadros -> frames de la vista, ordenados por fecha ascendente.
  * Los cuadros sin URL utilizable se descartan (no se inventa una imagen).
  */
-export function toFramesVista(cuadros, { apiBase } = {}) {
+export function toFramesVista(cuadros, { apiBase, tamanoPx } = {}) {
   if (!Array.isArray(cuadros)) return [];
   return cuadros
     .slice()
     .sort((a, b) => String(a?.fecha ?? '').localeCompare(String(b?.fecha ?? '')))
-    .map((cuadro) => toFrameVista(cuadro, { apiBase }))
+    .map((cuadro) => toFrameVista(cuadro, { apiBase, tamanoPx }))
     .filter(Boolean);
 }
 
@@ -215,7 +223,13 @@ export function toDetalleVista(datos, { apiBase, motivoSinLatido = 'El backend t
     estado: sinLatido ? 'sin_datos' : (datos.estado ?? 'ok'),
     motivo: motivoBackend || (sinLatido ? motivoSinLatido : ''),
     latido: sinLatido ? [] : latido,
-    cuadros: toFramesVista(datos.cuadros, { apiBase }),
+    cuadros: toFramesVista(datos.cuadros, { apiBase, tamanoPx: datos.tamano_px }),
+    // Metadatos reales del recorte: campo, escala y tamaño en píxeles.
+    metadatos: Object.freeze({
+      fovArcmin: numeroONull(datos.fov_arcmin),
+      pixelArcsec: numeroONull(datos.pixel_arcsec),
+      tamanoPx: tamanoEnPx(datos.tamano_px),
+    }),
     rastro: esObjeto(datos.rastro) ? datos.rastro : null,
     revelar: esObjeto(datos.revelar) ? datos.revelar : null,
     conocido: esObjeto(datos.conocido) ? datos.conocido : null,

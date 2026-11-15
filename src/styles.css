@@ -820,6 +820,53 @@ i.bi { line-height: 1; }
   color: var(--overlay-text);
 }
 
+/* Posición real del objeto según el backend: la cruz sigue el píxel que
+   informa cada cuadro (pos_esperada_px / tamano_px), con transición suave
+   para que el desplazamiento entre fechas se vea al reproducir. */
+.target-marker.is-real,
+.target-label.is-real {
+  transition: left 0.45s ease, top 0.45s ease;
+}
+
+.target-label.is-real {
+  left: auto;
+  top: auto;
+  transform: translate(18px, 20px);
+}
+
+/* Ficha técnica del recorte (campo, escala, tamaño en píxeles) */
+.viewer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-void);
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font: 500 10px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  background: var(--bg-panel);
+}
+
+.meta-chip i { color: var(--icon-info); font-size: 10px; }
+
+.meta-origen {
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
 .image-date {
   position: absolute;
   left: 18px;

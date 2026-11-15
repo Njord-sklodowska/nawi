@@ -41,6 +41,8 @@ const objects = ref([]);
 const frames = ref([]);
 const framesInfo = ref({ estado: '', motivo: '' });
 const latido = ref({ estado: 'idle', motivo: '', puntos: [] });
+// Metadatos reales del recorte (campo, escala, tamaño) que publica el backend.
+const metadatos = ref(null);
 const loading = ref(true);
 const loadError = ref('');
 
@@ -57,6 +59,36 @@ const previousFrame = computed(() => frames.value[Math.max(0, frameIndex.value -
 const filteredObjects = computed(() => objects.value.filter((item) => `${item.name} ${item.kind}`.toLowerCase().includes(query.value.toLowerCase())));
 const ready = computed(() => !loading.value && !loadError.value && Boolean(selectedObject.value) && Boolean(frame.value));
 const progressPercent = computed(() => (frames.value.length > 1 ? (frameIndex.value / (frames.value.length - 1)) * 100 : 0));
+
+/**
+ * Posición del objeto en el recorte, en porcentaje, a partir de
+ * `pos_esperada_px` y el tamaño en píxeles del cuadro. Si el backend no los
+ * manda (o el objeto no tiene cuadros reales), se devuelve null y la cruz queda
+ * en la posición genérica del CSS: nunca se inventa una coordenada.
+ */
+const marcadorReal = computed(() => {
+  const pos = frame.value?.posEsperadaPx;
+  const tam = frame.value?.tamanoPx ?? metadatos.value?.tamanoPx;
+  if (!pos || !Number.isFinite(pos.x) || !Number.isFinite(pos.y)) return null;
+  if (!Number.isFinite(tam) || tam <= 0) return null;
+  const left = Math.min(100, Math.max(0, (pos.x / tam) * 100));
+  const top = Math.min(100, Math.max(0, (pos.y / tam) * 100));
+  return { left: `${left.toFixed(2)}%`, top: `${top.toFixed(2)}%` };
+});
+
+const fichaTecnica = computed(() => {
+  const m = metadatos.value;
+  if (!m) return [];
+  const numero = (valor, decimales = 2) => valor.toLocaleString('es-AR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimales,
+  });
+  const chips = [];
+  if (Number.isFinite(m.fovArcmin)) chips.push(`campo ${numero(m.fovArcmin)}′`);
+  if (Number.isFinite(m.pixelArcsec)) chips.push(`${numero(m.pixelArcsec)}″/px`);
+  if (Number.isFinite(m.tamanoPx)) chips.push(`${m.tamanoPx}×${m.tamanoPx} px`);
+  return chips;
+});
 
 // Latido: solo para objetos de variabilidad (RW Aurigae, R Draconis).
 const esVariable = computed(() => selectedObject.value?.tag === 'VARIABLE' || selectedObject.value?.tipo === 'estrella_variable');
@@ -154,22 +186,38 @@ function normalizarLatido(payload) {
   return null;
 }
 
-async function loadLatido() {
-  if (!esVariable.value || !objectId.value) {
-    latido.value = { estado: 'idle', motivo: '', puntos: [] };
-    return;
-  }
-  latido.value = { estado: 'loading', motivo: '', puntos: [] };
+/**
+ * Detalle del objeto: trae metadatos del recorte para todos y, además, la curva
+ * de brillo cuando el objeto es variable. Si algo falla, se muestra el estado
+ * vacío honesto; nunca se rellena con valores inventados.
+ */
+async function loadDetalle() {
+  metadatos.value = null;
+  const buscaLatido = esVariable.value;
+  latido.value = { estado: buscaLatido ? 'loading' : 'idle', motivo: '', puntos: [] };
+  if (!objectId.value) return;
+
+  const aplicar = (payload) => {
+    if (payload?.metadatos) metadatos.value = payload.metadatos;
+    if (!buscaLatido) return false;
+    const respuesta = normalizarLatido(payload);
+    if (!respuesta) return false;
+    latido.value = respuesta;
+    return true;
+  };
+
+  if (aplicar(selectedObject.value)) return;
+
   try {
-    const directo = normalizarLatido(selectedObject.value?.latido);
-    if (directo) { latido.value = directo; return; }
     for (const acceso of accesosLatido()) {
-      const respuesta = normalizarLatido(await catalog[acceso](objectId.value));
-      if (respuesta) { latido.value = respuesta; return; }
+      const payload = await catalog[acceso](objectId.value);
+      if (aplicar(payload)) return;
+      // Sin latido, pero con metadatos ya alcanza: no se siguen probando métodos.
+      if (payload?.metadatos) return;
     }
-    latido.value = { estado: 'empty', motivo: '', puntos: [] };
+    if (buscaLatido) latido.value = { estado: 'empty', motivo: '', puntos: [] };
   } catch (error) {
-    latido.value = { estado: 'empty', motivo: error?.message || '', puntos: [] };
+    if (buscaLatido) latido.value = { estado: 'empty', motivo: error?.message || '', puntos: [] };
   }
 }
 
@@ -188,7 +236,7 @@ async function loadCatalog() {
       : (objects.value[0]?.id ?? '');
 
     await loadFrames();
-    await loadLatido();
+    await loadDetalle();
 
     const requestedFrame = Number(params.get('frame'));
     frameIndex.value = Number.isInteger(requestedFrame) && requestedFrame >= 0 && requestedFrame < frames.value.length
@@ -223,7 +271,7 @@ async function chooseObject(id) {
   playing.value = false;
   objectId.value = id;
   await loadFrames();
-  await loadLatido();
+  await loadDetalle();
   frameIndex.value = 0;
 }
 
@@ -288,6 +336,10 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
         <section class="col-12 col-lg-9 viewer-column">
           <div v-if="ready" class="viewer panel">
             <div class="viewer-toolbar"><div><span class="eyebrow">CAMPO CELESTE <span class="toolbar-slash">/</span> {{ selectedObject.tag }}</span><h2>{{ selectedObject.name }}</h2></div><button class="share-button" @click="shareView"><i class="bi bi-share" /><span>Compartir vista</span></button></div>
+            <div v-if="fichaTecnica.length" class="viewer-meta" aria-label="Metadatos del recorte">
+              <span v-for="chip in fichaTecnica" :key="chip" class="meta-chip"><i class="bi bi-rulers" /> {{ chip }}</span>
+              <span class="meta-origen">según el backend</span>
+            </div>
             <div class="sky-stage" :class="{ comparison: compare, 'is-real': !frame.illustrative }">
               <img v-if="!frame.illustrative" class="pixel-frame" :src="frame.url" :alt="`Recorte de ${selectedObject.name} del ${frame.date} en ${frame.band}`" />
               <div v-else class="image-layer" :style="{ backgroundImage: `url(${frame.url})` }" />
@@ -296,8 +348,8 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
               <div class="image-caption"><span class="caption-dot" /> {{ frame.illustrative ? 'IMAGEN ILUSTRATIVA · DATOS REALES PENDIENTES' : 'DATOS DEL BACKEND' }}</div>
               <div v-if="selectedObject.coordinates" class="coordinate-label" :title="selectedObject.coordinates.note"><i class="bi bi-exclamation-triangle" /> {{ selectedObject.coordinates.ra }} <span>/</span> {{ selectedObject.coordinates.dec }} · {{ selectedObject.coordinates.statusLabel }}</div>
               <div v-else class="coordinate-label"><i class="bi bi-hourglass-split" /> COORDENADAS PENDIENTES <span>/</span> NO VALIDADAS</div>
-              <div class="target-marker"><span /><i /></div>
-              <div class="target-label">OBJETO SELECCIONADO</div>
+              <div class="target-marker" :class="{ 'is-real': marcadorReal }" :style="marcadorReal"><span /><i /></div>
+              <div class="target-label" :class="{ 'is-real': marcadorReal }" :style="marcadorReal">{{ marcadorReal ? 'POSICIÓN DEL OBJETO' : 'OBJETO SELECCIONADO' }}</div>
               <div v-if="compare" class="compare-wipe" :class="{ 'is-real': !previousFrame.illustrative }" :style="previousFrame.illustrative ? { backgroundImage: `url(${previousFrame.url})` } : null"><img v-if="!previousFrame.illustrative" class="pixel-frame" :src="previousFrame.url" alt="" /><span class="wipe-label">ANTERIOR · {{ previousFrame.date }}{{ previousFrame.illustrative ? ' · ILUSTRATIVO' : '' }}</span><span class="wipe-line" /></div>
               <div class="image-date"><span>{{ frame.date }}</span><small>{{ frame.band }}</small><small v-if="frame.calidadOk === false" class="frame-calidad">calidad marcada como dudosa por el backend</small></div>
             </div>
