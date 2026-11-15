@@ -1,109 +1,110 @@
 /**
  * Catálogo de demostración de Nawi (fuente `mock`).
  *
- * Puntos clave:
- *  - Los `id` están alineados con backend/pipeline/objetos.json de la rama
- *    sergio-backend (repo Njord-sklodowska/nawi), porque viajan en la URL
- *    compartida (`?obj=`). Si el backend los cambia, se cambian acá.
+ * FORMATO: cada objeto tiene EXACTAMENTE la forma del `objetos.json` real del
+ * backend (rama cecilia/backend, repo Njord-sklodowska/nawi):
  *
- * Qué contiene a propósito: SOLO identidad, tipo de objeto y propósito dentro
- * de la demo — lo que hoy se puede afirmar sin inventar nada.
+ *   slug, nombre, tipo, rol, ra_deg, dec_deg, epoca,
+ *   pm_ra_cosdec_mas_yr, pm_dec_mas_yr, fov_arcmin
  *
- * Qué NO contiene: observaciones, fechas de observación, bandas, resultados
- * científicos ni coordenadas verificadas.
+ * Los valores son los publicados por el backend (astrometría de SIMBAD/Gaia
+ * DR3). El frontend los copia sin recalcular ni verificar nada.
  *
- * Sobre `coordinates`: son PLACEHOLDERS de la maqueta que ya estaban en la
- * interfaz. Se conservan para no romper el visor, pero cada uno viaja con
- * `status` y `statusLabel` para que la UI los muestre siempre etiquetados como
- * no validados o a confirmar. No se usan para consultar datos ni para calcular.
- * El único valor que aparece en el plan de trabajo es el de WISE 0855, citado
- * allí como época de referencia "a confirmar".
+ * Copiar el shape —y no reinventarlo— hace que el día que exista el endpoint,
+ * la fuente `api` devuelva esto mismo y la vista no se toque.
  */
 
-export const MOCK_OBJECTS = Object.freeze([
+export const MOCK_OBJETOS = Object.freeze([
   Object.freeze({
-    id: 'barnard',
-    name: 'Estrella de Barnard',
-    kind: 'Estrella cercana de movimiento propio muy alto',
-    purpose: 'movimiento',
-    purposeLabel: 'Movimiento propio',
-    tag: 'MOVIMIENTO',
-    demoRole: 'Objeto principal de la demo',
-    demoUse: 'Alineación entre fechas, desplazamiento visible y medición.',
-    coordinates: Object.freeze({
-      ra: '17h 57m 48.5s',
-      dec: '+04° 41′ 36″',
-      status: 'ilustrativo',
-      statusLabel: 'NO VALIDADO',
-      note: 'Placeholder de la maqueta: no fue validado contra catálogos.',
-    }),
+    slug: 'barnard',
+    nombre: 'Estrella de Barnard',
+    tipo: 'estrella_movimiento_propio',
+    rol: 'principal',
+    ra_deg: 269.45207696,
+    dec_deg: 4.69336497,
+    epoca: 'J2000',
+    pm_ra_cosdec_mas_yr: -801.551,
+    pm_dec_mas_yr: 10362.394,
+    fov_arcmin: 4,
   }),
   Object.freeze({
-    id: 'wise-0855',
-    name: 'WISE 0855',
-    kind: 'Enana marrón de movimiento propio rápido',
-    purpose: 'bonus',
-    purposeLabel: 'Bonus',
-    tag: 'BONUS',
-    demoRole: 'Objeto bonus, solo si se detecta',
-    demoUse: 'Caso de movimiento propio extremo; en infrarrojo cercano es muy tenue.',
-    coordinates: Object.freeze({
-      ra: '08h 55m 10.8s',
-      dec: '−07° 14′ 43″',
-      status: 'referencia-de-plan',
-      statusLabel: 'A CONFIRMAR',
-      note: 'Valor citado en el plan como época de referencia; la época todavía no se confirmó.',
-    }),
+    slug: 'wise-0855',
+    nombre: 'WISE 0855-0714',
+    tipo: 'enana_marron_Y',
+    rol: 'secundario',
+    ra_deg: 133.81890825,
+    dec_deg: -7.247048,
+    epoca: 'J2000',
+    pm_ra_cosdec_mas_yr: -8123.7,
+    pm_dec_mas_yr: 673.2,
+    fov_arcmin: 4,
   }),
   Object.freeze({
-    id: 'epsilon-indi-b',
-    name: 'Epsilon Indi B',
-    kind: 'Par de enanas marrones que orbita una estrella',
-    purpose: 'sistema',
-    purposeLabel: 'Sistema múltiple',
-    tag: 'SISTEMA',
-    demoRole: 'Alternativa al objeto principal',
-    demoUse: 'Caso de sistema: falta verificar si el par se resuelve con la resolución de SPHEREx.',
-    coordinates: Object.freeze({
-      ra: '22h 04m 10.5s',
-      dec: '−56° 46′ 58″',
-      status: 'ilustrativo',
-      statusLabel: 'NO VALIDADO',
-      note: 'Placeholder de la maqueta: no fue validado contra catálogos.',
-    }),
+    slug: 'epsilon-indi-b',
+    nombre: 'Epsilon Indi B (par de enanas marrones)',
+    tipo: 'enana_marron',
+    rol: 'secundario',
+    ra_deg: 331.04414659,
+    dec_deg: -56.7828442,
+    epoca: 'J2000',
+    pm_ra_cosdec_mas_yr: 3981.977,
+    pm_dec_mas_yr: -2466.832,
+    fov_arcmin: 4,
   }),
   Object.freeze({
-    id: 'rw-aurigae',
-    name: 'RW Aurigae',
-    kind: 'Estrella variable',
-    purpose: 'variabilidad',
-    purposeLabel: 'Variabilidad',
-    tag: 'VARIABLE',
-    demoRole: 'Objeto de la función "Latido"',
-    demoUse: 'Cambia de brillo, no de posición: sirve para la curva de brillo.',
-    coordinates: Object.freeze({
-      ra: '05h 07m 49.6s',
-      dec: '+30° 24′ 05″',
-      status: 'ilustrativo',
-      statusLabel: 'NO VALIDADO',
-      note: 'Placeholder de la maqueta: no fue validado contra catálogos.',
-    }),
+    slug: 'rw-aurigae',
+    nombre: 'RW Aurigae',
+    tipo: 'estrella_variable',
+    rol: 'secundario',
+    ra_deg: 76.95652603,
+    dec_deg: 30.40143817,
+    epoca: 'J2000',
+    pm_ra_cosdec_mas_yr: 7.23,
+    pm_dec_mas_yr: -20.33,
+    fov_arcmin: 4,
   }),
   Object.freeze({
-    id: 'r-draconis',
-    name: 'R Draconis',
-    kind: 'Estrella variable',
-    purpose: 'variabilidad',
-    purposeLabel: 'Variabilidad',
-    tag: 'VARIABLE',
-    demoRole: 'Objeto de la función "Latido"',
-    demoUse: 'Cambia de brillo, no de posición: sirve para la curva de brillo.',
-    coordinates: Object.freeze({
-      ra: '16h 01m 25.9s',
-      dec: '+66° 48′ 10″',
-      status: 'ilustrativo',
-      statusLabel: 'NO VALIDADO',
-      note: 'Placeholder de la maqueta: no fue validado contra catálogos.',
-    }),
+    slug: 'r-draconis',
+    nombre: 'R Draconis',
+    tipo: 'estrella_variable',
+    rol: 'secundario',
+    ra_deg: 248.16761083,
+    dec_deg: 66.75497942,
+    epoca: 'J2000',
+    pm_ra_cosdec_mas_yr: -20.643,
+    pm_dec_mas_yr: 6.149,
+    fov_arcmin: 4,
   }),
 ]);
+
+/**
+ * Texto de presentación por objeto: lo que NO viene del backend y solo sirve
+ * para la interfaz. Separado a propósito, para no ensuciar el contrato.
+ */
+export const PRESENTACION = Object.freeze({
+  barnard: Object.freeze({
+    tag: 'MOVIMIENTO',
+    papel: 'Objeto principal de la demo',
+    uso: 'Alineación entre fechas, desplazamiento visible y medición.',
+  }),
+  'wise-0855': Object.freeze({
+    tag: 'BONUS',
+    papel: 'Objeto bonus, solo si se detecta',
+    uso: 'Caso de movimiento propio extremo; en infrarrojo cercano es muy tenue.',
+  }),
+  'epsilon-indi-b': Object.freeze({
+    tag: 'SISTEMA',
+    papel: 'Alternativa al objeto principal',
+    uso: 'Caso de sistema: falta verificar si el par se resuelve con la resolución de SPHEREx.',
+  }),
+  'rw-aurigae': Object.freeze({
+    tag: 'VARIABLE',
+    papel: 'Objeto de la función "Latido"',
+    uso: 'Cambia de brillo, no de posición: sirve para la curva de brillo.',
+  }),
+  'r-draconis': Object.freeze({
+    tag: 'VARIABLE',
+    papel: 'Objeto de la función "Latido"',
+    uso: 'Cambia de brillo, no de posición: sirve para la curva de brillo.',
+  }),
+});

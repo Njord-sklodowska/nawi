@@ -19,6 +19,11 @@
  *   await source.listObjects()            -> NawiObject[]
  *   await source.listFrames(objectId)     -> NawiFrame[]
  *
+ *   El `source` devuelve, en `listObjects()`, objetos con el shape del
+ *   `objetos.json` del backend (slug, nombre, tipo, rol, ra_deg, dec_deg,
+ *   epoca, pm_ra_cosdec_mas_yr, pm_dec_mas_yr, fov_arcmin). El adaptador
+ *   ./adapters.js lo traduce al modelo de vista:
+ *
  *   NawiObject {
  *     id: string                  identificador estable (se usa en la URL)
  *     name: string
@@ -46,6 +51,7 @@
  * rótulo de imagen ilustrativa y ninguna cifra se presenta como medida.
  */
 
+import { toObjetoVista } from './adapters.js';
 import { apiSource } from './sources/api.source.js';
 import { mockSource } from './sources/mock.source.js';
 
@@ -64,7 +70,24 @@ const requestedMode = readRequestedMode();
 /** Fuente activa: `mock` por defecto; `api` solo si se pide explícitamente. */
 export const DATA_SOURCE_MODE = Object.hasOwn(SOURCES, requestedMode) ? requestedMode : 'mock';
 
-export const catalog = SOURCES[DATA_SOURCE_MODE];
+const source = SOURCES[DATA_SOURCE_MODE];
+
+/**
+ * Fuente activa envuelta por el adaptador: cualquier `source` devuelve el shape
+ * del backend (`slug`, `ra_deg`…) y acá se traduce al modelo de vista. Así la
+ * vista no sabe si los datos vienen del mock o de la API.
+ */
+export const catalog = Object.freeze({
+  mode: source.mode,
+  status: source.status,
+  label: source.label,
+  illustrative: source.illustrative,
+  async listObjects() {
+    const objetos = await source.listObjects();
+    return objetos.map(toObjetoVista);
+  },
+  listFrames: (slug) => source.listFrames(slug),
+});
 
 /**
  * Metadatos para la interfaz. `status` es la fuente de verdad de lo que se

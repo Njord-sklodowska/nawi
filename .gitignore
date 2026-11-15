@@ -2,3 +2,7 @@ node_modules/
 dist/
 .env
 .DS_Store
+
+# Documentos de trabajo que no deben publicarse
+doc/*.pdf
+doc/Taktik_002.pdf
