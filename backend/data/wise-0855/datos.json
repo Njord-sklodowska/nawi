@@ -15,8 +15,8 @@
     {
       "fecha": "2025-05-05T16:49:00Z",
       "url": "/media/wise-0855/frames/0000.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 89.8,
+      "longitud_onda_um": 4.9675,
+      "ancho_banda_um": 0.0372,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 27.63,
@@ -27,8 +27,8 @@
     {
       "fecha": "2025-11-10T07:08:21Z",
       "url": "/media/wise-0855/frames/0001.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 87.6,
+      "longitud_onda_um": 4.4124,
+      "ancho_banda_um": 0.0374,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.31,
@@ -39,8 +39,8 @@
     {
       "fecha": "2025-12-12T06:48:13Z",
       "url": "/media/wise-0855/frames/0002.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 87.5,
+      "longitud_onda_um": 4.6288,
+      "ancho_banda_um": 0.0366,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.43,
@@ -51,8 +51,8 @@
     {
       "fecha": "2026-04-21T04:45:58Z",
       "url": "/media/wise-0855/frames/0003.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 89.3,
+      "longitud_onda_um": 4.4139,
+      "ancho_banda_um": 0.0357,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.9,
@@ -63,8 +63,8 @@
     {
       "fecha": "2026-04-30T18:30:56Z",
       "url": "/media/wise-0855/frames/0004.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 88.4,
+      "longitud_onda_um": 4.8247,
+      "ancho_banda_um": 0.0375,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.93,
@@ -75,8 +75,8 @@
     {
       "fecha": "2026-05-08T23:38:58Z",
       "url": "/media/wise-0855/frames/0005.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 88.6,
+      "longitud_onda_um": 4.8246,
+      "ancho_banda_um": 0.0375,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.96,
@@ -87,8 +87,8 @@
     {
       "fecha": "2026-05-11T02:19:42Z",
       "url": "/media/wise-0855/frames/0006.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 88.2,
+      "longitud_onda_um": 4.9674,
+      "ancho_banda_um": 0.0372,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.97,
@@ -102,7 +102,7 @@
     "desplazamiento_arcsec": null,
     "direccion_deg": null,
     "incertidumbre_arcsec": null,
-    "pm_publicado_arcsec_yr": null
+    "pm_publicado_arcsec_yr": 8.152
   },
   "revelar": {
     "snr_vs_cuadros": []

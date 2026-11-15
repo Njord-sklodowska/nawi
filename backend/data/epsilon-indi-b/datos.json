@@ -15,8 +15,8 @@
     {
       "fecha": "2026-09-22T05:29:51Z",
       "url": "/media/epsilon-indi-b/frames/0000.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 84.7,
+      "longitud_onda_um": 4.515,
+      "ancho_banda_um": 0.0361,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.03,
@@ -27,8 +27,8 @@
     {
       "fecha": "2026-09-28T08:05:41Z",
       "url": "/media/epsilon-indi-b/frames/0001.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 84.9,
+      "longitud_onda_um": 4.6601,
+      "ancho_banda_um": 0.0363,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.02,
@@ -42,7 +42,7 @@
     "desplazamiento_arcsec": null,
     "direccion_deg": null,
     "incertidumbre_arcsec": null,
-    "pm_publicado_arcsec_yr": null
+    "pm_publicado_arcsec_yr": 4.684
   },
   "revelar": {
     "snr_vs_cuadros": []

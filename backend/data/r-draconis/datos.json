@@ -10,25 +10,133 @@
   "pixel_arcsec": 6.15,
   "tamano_px": 58,
   "estado": "ok",
-  "motivo": "",
+  "motivo": "El núcleo de la estrella está saturado y enmascarado en las imágenes de SPHEREx, así que no se puede medir su brillo con fotometría de apertura estándar.",
   "cuadros": [
     {
-      "fecha": "2026-05-16T08:49:02Z",
+      "fecha": "2025-05-16T22:57:21Z",
       "url": "/media/r-draconis/frames/0000.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 84.9,
+      "longitud_onda_um": 4.4276,
+      "ancho_banda_um": 0.0355,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.5,
         "y": 28.5
       },
-      "snr_en_posicion": 9345.0
+      "snr_en_posicion": 2945.1
+    },
+    {
+      "fecha": "2025-05-20T16:38:25Z",
+      "url": "/media/r-draconis/frames/0001.png",
+      "longitud_onda_um": 4.5566,
+      "ancho_banda_um": 0.0358,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 5879.2
+    },
+    {
+      "fecha": "2025-06-02T03:02:40Z",
+      "url": "/media/r-draconis/frames/0002.png",
+      "longitud_onda_um": 4.8143,
+      "ancho_banda_um": 0.0367,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 12351.6
+    },
+    {
+      "fecha": "2025-06-12T15:51:42Z",
+      "url": "/media/r-draconis/frames/0003.png",
+      "longitud_onda_um": 4.438,
+      "ancho_banda_um": 0.0363,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 2653.7
+    },
+    {
+      "fecha": "2025-12-26T05:14:57Z",
+      "url": "/media/r-draconis/frames/0004.png",
+      "longitud_onda_um": 4.4221,
+      "ancho_banda_um": 0.0368,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 9701.6
+    },
+    {
+      "fecha": "2025-12-30T03:39:55Z",
+      "url": "/media/r-draconis/frames/0005.png",
+      "longitud_onda_um": 4.6268,
+      "ancho_banda_um": 0.0363,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 16389.6
+    },
+    {
+      "fecha": "2026-01-13T09:53:43Z",
+      "url": "/media/r-draconis/frames/0006.png",
+      "longitud_onda_um": 4.4412,
+      "ancho_banda_um": 0.0358,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 6992.5
+    },
+    {
+      "fecha": "2026-04-22T07:57:40Z",
+      "url": "/media/r-draconis/frames/0007.png",
+      "longitud_onda_um": 4.624,
+      "ancho_banda_um": 0.0363,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 8737.1
+    },
+    {
+      "fecha": "2026-05-06T06:05:34Z",
+      "url": "/media/r-draconis/frames/0008.png",
+      "longitud_onda_um": 4.4271,
+      "ancho_banda_um": 0.0355,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 7463.0
+    },
+    {
+      "fecha": "2026-05-11T06:37:01Z",
+      "url": "/media/r-draconis/frames/0009.png",
+      "longitud_onda_um": 4.7267,
+      "ancho_banda_um": 0.0366,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 6880.7
     },
     {
       "fecha": "2026-05-23T11:47:17Z",
-      "url": "/media/r-draconis/frames/0001.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 84.8,
+      "url": "/media/r-draconis/frames/0010.png",
+      "longitud_onda_um": 4.6501,
+      "ancho_banda_um": 0.0364,
       "calidad_ok": false,
       "pos_esperada_px": {
         "x": 28.5,
@@ -38,9 +146,9 @@
     },
     {
       "fecha": "2026-06-08T14:00:02Z",
-      "url": "/media/r-draconis/frames/0002.png",
-      "longitud_onda_um": null,
-      "cobertura_pct": 91.2,
+      "url": "/media/r-draconis/frames/0011.png",
+      "longitud_onda_um": 4.5081,
+      "ancho_banda_um": 0.0359,
       "calidad_ok": true,
       "pos_esperada_px": {
         "x": 28.5,
@@ -54,7 +162,7 @@
     "desplazamiento_arcsec": null,
     "direccion_deg": null,
     "incertidumbre_arcsec": null,
-    "pm_publicado_arcsec_yr": null
+    "pm_publicado_arcsec_yr": 0.022
   },
   "revelar": {
     "snr_vs_cuadros": []
