@@ -160,5 +160,19 @@
   "conocido": {
     "estado": "sin_datos",
     "coincidencias": []
+  },
+  "visualizacion": {
+    "metodo": "estiramiento-por-percentiles",
+    "percentiles": {
+      "bajo": 1.0,
+      "alto": 99.5
+    },
+    "rango_original": {
+      "min": 0.0,
+      "max": 153.26
+    },
+    "cuadros_procesados": 7,
+    "nota": "El PNG ya venía estirado desde el FITS. Este paso reasigna el rango tonal para presentación: no agrega detalle ni modifica posiciones.",
+    "version": 1
   }
 }

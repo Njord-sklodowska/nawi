@@ -28,7 +28,6 @@ datos_json = dict(
     conocido={"estado": "sin_datos", "coincidencias": []},
 )
 
-
 def guardar():
     (RAIZ / slug / "datos.json").write_text(
         json.dumps(datos_json, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -72,13 +71,22 @@ for ruta in archivos:
     cuadros.append(dict(fecha=fecha, img=img, lam=longitud_onda, ancho=ancho_banda))
 cuadros.sort(key=lambda c: c["fecha"])
 
-# Escala de brillo única para todas las fechas
+# Escala de brillo única para todas las fechas.
+#
+# Los parámetros de abajo definen el asinh y se registran en datos.json
+# (bloque 'visualizacion') para que la presentación sea auditable.
+ASINH_SIGMA = 5.0        # cuántos sigma de ruido entran antes de comprimir
+PERCENTIL_TOPE = 99.99   # recorte de píxeles calientes al fijar el máximo
+
 todo = np.concatenate([c["img"][np.isfinite(c["img"])] for c in cuadros])
 lo = np.median(todo)
 sigma = 1.4826 * np.median(np.abs(todo - lo))
-hi = np.percentile(todo, 99.99)
-soft = max(5 * sigma, 1e-6)
+hi = np.percentile(todo, PERCENTIL_TOPE)
+soft = max(ASINH_SIGMA * sigma, 1e-6)
 den = np.arcsinh((hi - lo) / soft)
+
+print(f"  asinh: lo={lo:.2f} hi={hi:.2f} soft={soft:.2f} "
+      f"({ASINH_SIGMA} sigma, tope p{PERCENTIL_TOPE})")
 
 
 def snr_en(img, x, y):
@@ -120,6 +128,23 @@ for i, c in enumerate(cuadros):
     ))
     print(f"  {c['fecha'][:10]}  señal en la posición esperada: "
           f"{'sin dato' if snr is None else f'{snr:.1f} sigma'}")
+
+# Registro auditable de la visualización aplicada a los PNG.
+# El valor escalar guardado es un asinh con estos parámetros; sin este bloque
+# no se podría saber con qué escala se generó cada imagen.
+datos_json["visualizacion"] = {
+    "metodo": "asinh",
+    "asinh_sigma": ASINH_SIGMA,
+    "percentil_tope": PERCENTIL_TOPE,
+    "rango": {"lo": round(float(lo), 3), "hi": round(float(hi), 3),
+              "soft": round(float(soft), 3)},
+    "cuadros_procesados": len(cuadros),
+    "nota": (
+        "Escala de presentación calculada sobre todos los cuadros del objeto "
+        "para que un cambio de brillo real no se confunda con un cambio de escala."
+    ),
+    "version": 1,
+}
 
 guardar()
 print("Listo:", RAIZ / slug)
