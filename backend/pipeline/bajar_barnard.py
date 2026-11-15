@@ -12,8 +12,8 @@ warnings.filterwarnings("ignore")
 CARPETA = Path(__file__).resolve().parents[1] / "data" / "raw" / "barnard"
 CARPETA.mkdir(parents=True, exist_ok=True)
 
-c0 = SkyCoord(ra=269.452083*u.deg, dec=4.693333*u.deg,
-              pm_ra_cosdec=-798.58*u.mas/u.yr, pm_dec=10328.12*u.mas/u.yr,
+c0 = SkyCoord(ra=269.45207696*u.deg, dec=4.69336497*u.deg,
+              pm_ra_cosdec=-801.551*u.mas/u.yr, pm_dec=10362.394*u.mas/u.yr,
               frame="icrs", obstime=Time("J2000.0"))
 pos = SkyCoord(269.4461*u.deg, 4.7704*u.deg)
 
@@ -27,7 +27,6 @@ def reintentar(f, intentos=5):
     return None
 
 def dentro_con_margen(poly, margen_arcsec):
-    # poly: puntos (x,y) en arcsec con Barnard en (0,0)
     n = len(poly) - 1
     inside = False
     for i in range(n):

@@ -8,9 +8,9 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
-c0 = SkyCoord(ra=269.452083*u.deg, dec=4.693333*u.deg,
-              pm_ra_cosdec=-798.58*u.mas/u.yr,
-              pm_dec=10328.12*u.mas/u.yr,
+c0 = SkyCoord(ra=269.45207696*u.deg, dec=4.69336497*u.deg,
+              pm_ra_cosdec=-801.551*u.mas/u.yr,
+              pm_dec=10362.394*u.mas/u.yr,
               frame="icrs", obstime=Time("J2000.0"))
 
 for ruta in sorted(glob.glob(sys.argv[1] + "/*.fits")):
