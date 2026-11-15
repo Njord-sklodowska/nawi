@@ -1,0 +1,60 @@
+
+{
+  "version": 1,
+  "objetos": {
+    "barnard": {
+      "nombre": "Estrella de Barnard",
+      "astrometria": {
+        "ra_deg": 269.448503,
+        "dec_deg": 4.739420,
+        "pm_ra_cosdec_mas_yr": -801.551,
+        "pm_dec_mas_yr": 10362.394,
+        "parallax_mas": 546.975940,
+        "radial_velocity_km_s": -110.46822,
+        "fecha_referencia": "J2016.0"
+      },
+      "fuente": {
+        "catalogo": "Gaia DR3",
+        "identificador": "4472832130942575872",
+        "referencia": "Gaia Archive - Gaia Data Release 3",
+        "estado": "verificado"
+      }
+    },
+    "wise-0855": {
+      "nombre": "WISE 0855-0714",
+      "astrometria": null,
+      "fuente": {
+        "catalogo": null,
+        "referencia": null,
+        "estado": "pendiente"
+      }
+    },
+    "epsilon-indi-b": {
+      "nombre": "Epsilon Indi B",
+      "astrometria": null,
+      "fuente": {
+        "catalogo": null,
+        "referencia": null,
+        "estado": "pendiente"
+      }
+    },
+    "rw-aurigae": {
+      "nombre": "RW Aurigae",
+      "astrometria": null,
+      "fuente": {
+        "catalogo": null,
+        "referencia": null,
+        "estado": "pendiente"
+      }
+    },
+    "r-draconis": {
+      "nombre": "R Draconis",
+      "astrometria": null,
+      "fuente": {
+        "catalogo": null,
+        "referencia": null,
+        "estado": "pendiente"
+      }
+    }
+  }
+}
