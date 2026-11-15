@@ -1,7 +1,16 @@
+# Python
 __pycache__/
 *.py[cod]
 venv/
 .venv/
-nawi/
+
+# Entorno y frontend
+.env
+node_modules/
+
+# Datos y archivos cient?ficos
 *.fits
 backend/data/raw/
+
+# Otros
+nawi/
