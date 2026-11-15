@@ -1,0 +1,100 @@
+{
+  "slug": "barnard",
+  "nombre": "Estrella de Barnard",
+  "tipo": "estrella_movimiento_propio",
+  "centro": {
+    "ra_deg": 269.4461,
+    "dec_deg": 4.7704
+  },
+  "fov_arcmin": 5.95,
+  "pixel_arcsec": 6.15,
+  "tamano_px": 58,
+  "estado": "ok",
+  "motivo": "",
+  "cuadros": [
+    {
+      "fecha": "2025-08-15T20:46:08Z",
+      "url": "/media/barnard/frames/0000.png",
+      "longitud_onda_um": null,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.35,
+        "y": 30.42
+      }
+    },
+    {
+      "fecha": "2025-08-18T20:29:38Z",
+      "url": "/media/barnard/frames/0001.png",
+      "longitud_onda_um": null,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.35,
+        "y": 30.41
+      }
+    },
+    {
+      "fecha": "2025-08-25T00:50:31Z",
+      "url": "/media/barnard/frames/0002.png",
+      "longitud_onda_um": null,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.36,
+        "y": 30.38
+      }
+    },
+    {
+      "fecha": "2026-03-19T07:26:15Z",
+      "url": "/media/barnard/frames/0003.png",
+      "longitud_onda_um": null,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.43,
+        "y": 29.43
+      }
+    },
+    {
+      "fecha": "2026-03-23T15:42:54Z",
+      "url": "/media/barnard/frames/0004.png",
+      "longitud_onda_um": null,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.43,
+        "y": 29.41
+      }
+    },
+    {
+      "fecha": "2026-04-10T00:44:14Z",
+      "url": "/media/barnard/frames/0005.png",
+      "longitud_onda_um": null,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.44,
+        "y": 29.33
+      }
+    },
+    {
+      "fecha": "2026-05-04T03:12:40Z",
+      "url": "/media/barnard/frames/0006.png",
+      "longitud_onda_um": null,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.45,
+        "y": 29.22
+      }
+    }
+  ],
+  "latido": [],
+  "rastro": {
+    "desplazamiento_arcsec": null,
+    "direccion_deg": null,
+    "incertidumbre_arcsec": null,
+    "pm_publicado_arcsec_yr": null
+  },
+  "revelar": {
+    "snr_vs_cuadros": []
+  },
+  "conocido": {
+    "estado": "sin_datos",
+    "coincidencias": []
+  }
+}
