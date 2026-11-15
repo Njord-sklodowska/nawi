@@ -1,4 +1,5 @@
 import json, sys
+import astropy.units as u
 import numpy as np
 from astropy.io import fits
 from astropy.wcs import WCS
@@ -22,7 +23,7 @@ datos_json = dict(
     fov_arcmin=round(N * PIX / 60, 2), pixel_arcsec=PIX, tamano_px=N,
     estado="ok", motivo="", cuadros=[], latido=[],
     rastro={"desplazamiento_arcsec": None, "direccion_deg": None,
-            "incertidumbre_arcsec": None, "pm_publicado_arcsec_yr": None},
+            "incertidumbre_arcsec": None, "pm_publicado_arcsec_yr": round(float(np.hypot(o["pm_ra_cosdec_mas_yr"], o["pm_dec_mas_yr"])) / 1000, 3)},
     revelar={"snr_vs_cuadros": []},
     conocido={"estado": "sin_datos", "coincidencias": []},
 )
@@ -53,8 +54,22 @@ for ruta in archivos:
         hdr = h["IMAGE"].header
         datos = h["IMAGE"].data.astype(float)
         fecha = hdr["DATE-AVG"]
-        img, _ = reproject_interp((datos, WCS(hdr, fobj=h)), dest, shape_out=(N, N))
-    cuadros.append(dict(fecha=fecha, img=img))
+        wcs_img = WCS(hdr, fobj=h)
+        img, _ = reproject_interp((datos, wcs_img), dest, shape_out=(N, N))
+        # Longitud de onda en el pixel del FITS original donde cae la estrella
+        try:
+            pos_obs = c0.apply_space_motion(new_obstime=Time(fecha))
+            xr, yr = [float(t) for t in wcs_img.world_to_pixel(pos_obs)]
+            ny, nx = datos.shape
+            xr = min(max(xr, 0), nx - 1)
+            yr = min(max(yr, 0), ny - 1)
+            lam = WCS(hdr, fobj=h, key="W").pixel_to_world(xr, yr)
+            longitud_onda = round(float(lam[0].to_value(u.um)), 4)
+            ancho_banda = round(float(lam[1].to_value(u.um)), 4)
+        except Exception as e:
+            print(f"  aviso: no pude leer la longitud de onda de {ruta.name}: {e}")
+            longitud_onda, ancho_banda = None, None
+    cuadros.append(dict(fecha=fecha, img=img, lam=longitud_onda, ancho=ancho_banda))
 cuadros.sort(key=lambda c: c["fecha"])
 
 # Escala de brillo única para todas las fechas
@@ -94,7 +109,8 @@ for i, c in enumerate(cuadros):
     datos_json["cuadros"].append(dict(
         fecha=c["fecha"][:19] + "Z",
         url=f"/media/{slug}/frames/{nombre}",
-        longitud_onda_um=None,
+        longitud_onda_um=c["lam"],
+        ancho_banda_um=c["ancho"],
         calidad_ok=bool(np.isfinite(img).mean() >= 0.9),
         pos_esperada_px={"x": round(x, 2), "y": round(N - 1 - y, 2)},
         snr_en_posicion=None if snr is None else round(snr, 1),
