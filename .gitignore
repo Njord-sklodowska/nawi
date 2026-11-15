@@ -1,7 +1,19 @@
-﻿.env
-.venv/
+# Python
 __pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Entorno y frontend
+.env
 node_modules/
+
+# Datos y archivos científicos
 *.fits
 backend/data/raw/
+
+# Base de datos local
 db.sqlite3
+
+# Otros
+nawi/
