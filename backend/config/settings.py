@@ -128,20 +128,11 @@ MAILERS = {
     },
 }
 
-# --- Nawi ---
-# CORS: el frontend corre en el puerto 5178 (Vite), además del 5173 histórico.
-if "corsheaders" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("corsheaders")
-if "corsheaders.middleware.CorsMiddleware" not in MIDDLEWARE:
-    MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware")
-
+# Origenes permitidos para el frontend durante el desarrollo.
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://localhost:5178",
-    "http://127.0.0.1:5178",
 ]
 
-# Archivos servidos por Django en desarrollo: /media/barnard/frames/0000.png
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "data"

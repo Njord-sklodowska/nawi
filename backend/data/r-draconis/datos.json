@@ -1,0 +1,66 @@
+{
+  "slug": "r-draconis",
+  "nombre": "R Draconis",
+  "tipo": "estrella_variable",
+  "centro": {
+    "ra_deg": 248.167233,
+    "dec_deg": 66.755024
+  },
+  "fov_arcmin": 5.95,
+  "pixel_arcsec": 6.15,
+  "tamano_px": 58,
+  "estado": "ok",
+  "motivo": "",
+  "cuadros": [
+    {
+      "fecha": "2026-05-16T08:49:02Z",
+      "url": "/media/r-draconis/frames/0000.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 84.9,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 9345.0
+    },
+    {
+      "fecha": "2026-05-23T11:47:17Z",
+      "url": "/media/r-draconis/frames/0001.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 84.8,
+      "calidad_ok": false,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 10931.2
+    },
+    {
+      "fecha": "2026-06-08T14:00:02Z",
+      "url": "/media/r-draconis/frames/0002.png",
+      "longitud_onda_um": null,
+      "cobertura_pct": 91.2,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.5,
+        "y": 28.5
+      },
+      "snr_en_posicion": 15063.8
+    }
+  ],
+  "latido": [],
+  "rastro": {
+    "desplazamiento_arcsec": null,
+    "direccion_deg": null,
+    "incertidumbre_arcsec": null,
+    "pm_publicado_arcsec_yr": null
+  },
+  "revelar": {
+    "snr_vs_cuadros": []
+  },
+  "conocido": {
+    "estado": "sin_datos",
+    "coincidencias": []
+  }
+}
