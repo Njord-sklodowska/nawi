@@ -1,0 +1,10 @@
+django
+djangorestframework
+django-cors-headers
+astropy
+numpy
+reproject
+photutils
+astroquery
+pillow
+matplotlib
