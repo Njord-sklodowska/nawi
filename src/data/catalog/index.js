@@ -1,6 +1,13 @@
 /**
- * Capa de datos de Nawi: un único punto de entrada que la interfaz consume,
- * hoy respaldado por el mock y mañana por la API del backend.
+ * Capa de datos de Nawi: un único punto de entrada que consume la interfaz.
+ *
+ * Fuente activa:
+ *   - `mock` por defecto (datos de demostración, sin red).
+ *   - `api` real del backend Django, solo con VITE_NAWI_DATA_SOURCE=api.
+ *
+ * Cualquier fuente entrega datos con el shape del backend (`slug`, `ra_deg`,
+ * `cuadros[]`) y este módulo los traduce al modelo de vista con ./adapters.js,
+ * así que la interfaz no sabe de dónde vienen.
  *
  * Contrato que debe cumplir cualquier fuente (`source`):
  *
@@ -16,8 +23,17 @@
  *                          null  = no hay datos todavía, no se puede afirmar nada
  *                        (una fuente sin conectar NO debe declarar false)
  *
- *   await source.listObjects()            -> NawiObject[]
+ *   await source.listObjects()            -> NawiObject[] (shape backend, se adapta acá)
  *   await source.listFrames(objectId)     -> NawiFrame[]
+ *   await source.getDetalleObjeto(slug)   -> Detalle[]
+ *     {
+ *       slug, estado, motivo,
+ *       latido: [{ fecha, flujo, error, longitudOndaUm }],   // curva de brillo
+ *       cuadros: NawiFrame[],
+ *       rastro, revelar, conocido
+ *     }
+ *     Sin puntos reales, la fuente devuelve `estado: 'sin_datos'` y `latido: []`;
+ *     nunca se rellena la curva con valores inventados.
  *
  *   El `source` devuelve, en `listObjects()`, objetos con el shape del
  *   `objetos.json` del backend (slug, nombre, tipo, rol, ra_deg, dec_deg,
@@ -87,6 +103,8 @@ export const catalog = Object.freeze({
     return objetos.map(toObjetoVista);
   },
   listFrames: (slug) => source.listFrames(slug),
+  /** Detalle de la ficha, incluido el latido (curva de brillo). */
+  getDetalleObjeto: (slug) => source.getDetalleObjeto(slug),
 });
 
 /**

@@ -22,4 +22,24 @@ export const mockSource = Object.freeze({
     // todavía no hay recortes reales por objeto.
     return copy(MOCK_FRAMES);
   },
+
+  /**
+   * Detalle de la ficha (incluida la curva de brillo).
+   * En la demo no hay latido real: la curva se declara vacía en vez de
+   * inventar puntos.
+   */
+  async getDetalleObjeto(slug) {
+    return {
+      slug: slug ?? null,
+      estado: 'sin_datos',
+      motivo: 'Datos de demostración: todavía no hay curva de brillo.',
+      latido: [],
+      // El mock no tiene ficha completa: se devuelven vacíos en vez de simular
+      // datos observacionales que no existen.
+      cuadros: [],
+      rastro: null,
+      revelar: null,
+      conocido: null,
+    };
+  },
 });

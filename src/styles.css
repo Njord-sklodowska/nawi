@@ -1245,3 +1245,245 @@ i.bi { line-height: 1; }
     animation-duration: 0.001ms !important;
   }
 }
+
+/* ==========================================================================
+   Visor con datos reales + Latido
+   Agregado por P5. Solo var(--token): ningún hex fuera de :root.
+   ========================================================================== */
+
+/* Los recortes reales son de 58x58 px. Se muestran a escala entera
+   (58 * 8 = 464 px) con image-rendering: pixelated, así no aparecen ni
+   borrosos ni deformados por interpolación. */
+.pixel-frame {
+  display: block;
+  width: calc(58px * 8);
+  height: calc(58px * 8);
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+/* Con datos reales el escenario pasa a cuadrado: el recorte se ve centrado y
+   sin decoración que se pueda confundir con información (grilla, viñeta). */
+.sky-stage.is-real {
+  aspect-ratio: 1 / 1;
+  max-width: 540px;
+  margin-inline: auto;
+  display: grid;
+  place-items: center;
+}
+
+.sky-stage.is-real .sky-grid,
+.sky-stage.is-real .sky-vignette { display: none; }
+
+/* La mira del centro es decorativa: con datos reales todavía no hay centroide
+   medido, así que señalarla como si lo fuera sería mentir. */
+.sky-stage.is-real .target-marker,
+.sky-stage.is-real .target-label { display: none; }
+
+.compare-wipe.is-real {
+  display: grid;
+  place-items: center;
+  background: var(--bg-void);
+  filter: none;
+}
+
+@media (max-width: 991.98px) {
+  .pixel-frame { width: calc(58px * 5); height: calc(58px * 5); }
+}
+
+@media (max-width: 575.98px) {
+  .pixel-frame { width: calc(58px * 3); height: calc(58px * 3); }
+}
+
+.frame-calidad { color: var(--danger); }
+
+/* Panel honesto para objetos sin cuadros precalculados. */
+.viewer-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 30px 22px 32px;
+  background: var(--bg-void);
+}
+
+.viewer-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.viewer-empty h3 {
+  margin: 0 0 8px;
+  font: 600 15px Manrope, sans-serif;
+  letter-spacing: -0.2px;
+  color: var(--text-title);
+}
+
+.viewer-empty-motivo {
+  margin: 0 0 12px;
+  max-width: 62ch;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.viewer-empty-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.viewer-empty-chip {
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--chip-bg);
+  font: 500 10px 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* --- Latido --------------------------------------------------------------- */
+.latido-panel {
+  margin-top: 12px;
+  padding: 18px 20px 16px;
+}
+
+.latido-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.latido-head h2 {
+  margin-top: 7px;
+  font: 600 18px Manrope, sans-serif;
+  letter-spacing: -0.35px;
+  color: var(--text-title);
+}
+
+.latido-chip {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-void);
+  font: 500 10px 'DM Mono', monospace;
+  letter-spacing: 0.09em;
+  color: var(--label);
+  text-transform: uppercase;
+}
+
+.latido-intro {
+  margin: 10px 0 2px;
+  max-width: 72ch;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.latido-chart { margin-top: 12px; }
+
+.latido-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.latido-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-opacity: 0.22;
+}
+
+.latido-axis {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-opacity: 0.6;
+}
+
+.latido-tick {
+  fill: var(--text-secondary);
+  font: 400 10px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+.latido-eje-titulo {
+  fill: var(--text-muted);
+  font: 500 9.5px 'DM Mono', monospace;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.latido-linea {
+  fill: none;
+  stroke: var(--nebula);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.latido-dot {
+  fill: var(--star);
+  stroke: var(--bg-panel);
+  stroke-width: 1.5;
+}
+
+.latido-hit { fill: transparent; }
+
+.latido-punto:hover .latido-dot { fill: var(--mars); }
+
+.latido-lambda {
+  fill: var(--text-secondary);
+  font: 400 9px 'DM Mono', monospace;
+  letter-spacing: 0.03em;
+}
+
+.latido-estado {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 22px 18px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-void);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+}
+
+.latido-estado i {
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+.latido-estado p {
+  margin: 0;
+  max-width: 62ch;
+  line-height: 1.55;
+}
+
+.latido-vacio strong {
+  display: block;
+  margin-bottom: 5px;
+  font: 600 13px Manrope, sans-serif;
+  color: var(--text-title);
+}
+
+.latido-pie {
+  margin: 10px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}

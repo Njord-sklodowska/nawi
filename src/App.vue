@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { DATA_SOURCE_INFO, catalog } from './data/catalog/index.js';
+import LatidoChart from './components/LatidoChart.vue';
 
 // Tema claro/oscuro: arranca según la preferencia del sistema y se recuerda en localStorage.
 const THEME_KEY = 'nawi-theme';
@@ -38,6 +39,8 @@ function toggleTheme() {
 // Hoy la respalda el mock; cuando existan los endpoints pasa a la API sin tocar la vista.
 const objects = ref([]);
 const frames = ref([]);
+const framesInfo = ref({ estado: '', motivo: '' });
+const latido = ref({ estado: 'idle', motivo: '', puntos: [] });
 const loading = ref(true);
 const loadError = ref('');
 
@@ -54,6 +57,19 @@ const previousFrame = computed(() => frames.value[Math.max(0, frameIndex.value -
 const filteredObjects = computed(() => objects.value.filter((item) => `${item.name} ${item.kind}`.toLowerCase().includes(query.value.toLowerCase())));
 const ready = computed(() => !loading.value && !loadError.value && Boolean(selectedObject.value) && Boolean(frame.value));
 const progressPercent = computed(() => (frames.value.length > 1 ? (frameIndex.value / (frames.value.length - 1)) * 100 : 0));
+
+// Latido: solo para objetos de variabilidad (RW Aurigae, R Draconis).
+const esVariable = computed(() => selectedObject.value?.tag === 'VARIABLE' || selectedObject.value?.tipo === 'estrella_variable');
+// Objeto elegible pero sin cuadros: el visor debe decirlo, no quedar vacío.
+const sinCuadros = computed(() => !loading.value && !loadError.value && Boolean(selectedObject.value) && frames.value.length === 0);
+const motivoSinCuadros = computed(() => selectedObject.value?.motivo || framesInfo.value.motivo || '');
+const estadoSinCuadros = computed(() => selectedObject.value?.estado || framesInfo.value.estado || '');
+const tituloSinCuadros = computed(() => (
+  estadoSinCuadros.value === 'sin_datos'
+    ? 'Este objeto todavía no tiene cuadros precalculados'
+    : 'No hay cuadros para mostrar de este objeto'
+));
+const hayCuadrosReales = computed(() => frames.value.some((item) => item.illustrative === false));
 
 // Lo que se puede afirmar según el estado de la fuente. 'pending' no se disfraza
 // de datos del backend: se avisa que no hay nada conectado.
@@ -75,9 +91,78 @@ const SOURCE_COPY = {
 const sourceCopy = SOURCE_COPY[DATA_SOURCE_INFO.status] ?? SOURCE_COPY.pending;
 const dataSourceNote = sourceCopy.note;
 
+// El backend puede devolver los cuadros como array o como objeto con
+// { estado, motivo, cuadros }: se aceptan las dos formas.
+function normalizarCuadros(payload) {
+  if (Array.isArray(payload)) return { cuadros: payload, estado: '', motivo: '' };
+  if (payload && Array.isArray(payload.cuadros)) {
+    return { cuadros: payload.cuadros, estado: payload.estado ?? '', motivo: payload.motivo ?? '' };
+  }
+  return { cuadros: [], estado: payload?.estado ?? '', motivo: payload?.motivo ?? '' };
+}
+
 async function loadFrames() {
-  frames.value = objectId.value ? await catalog.listFrames(objectId.value) : [];
+  framesInfo.value = { estado: '', motivo: '' };
+  if (!objectId.value) { frames.value = []; return; }
+  try {
+    const { cuadros, estado, motivo } = normalizarCuadros(await catalog.listFrames(objectId.value));
+    frames.value = cuadros;
+    framesInfo.value = { estado, motivo };
+  } catch (error) {
+    // "Sin datos" no es un error fatal: se muestra el panel vacío con el motivo.
+    frames.value = [];
+    framesInfo.value = { estado: 'sin_datos', motivo: error?.message || '' };
+  }
   if (frameIndex.value >= frames.value.length) frameIndex.value = 0;
+}
+
+// La capa de datos todavía está sumando el detalle por objeto: el latido puede
+// llegar como campo del objeto o como método del catálogo. Se prueban los
+// nombres previstos y, si no hay ninguno, el gráfico muestra su estado vacío.
+const ACCESOS_LATIDO = ['getLatido', 'listLatido', 'getDetalleObjeto', 'getDetalle', 'getFicha', 'listDetalle'];
+
+/** Métodos del catálogo que podrían traer el latido, sin depender del nombre exacto. */
+function accesosLatido() {
+  const conocidos = ACCESOS_LATIDO.filter((nombre) => typeof catalog[nombre] === 'function');
+  const porPatron = Object.keys(catalog).filter((nombre) => (
+    typeof catalog[nombre] === 'function'
+    && !conocidos.includes(nombre)
+    && nombre !== 'listObjects'
+    && nombre !== 'listFrames'
+    && /latido|detalle|ficha/i.test(nombre)
+  ));
+  return [...conocidos, ...porPatron];
+}
+
+function normalizarLatido(payload) {
+  if (Array.isArray(payload)) return { puntos: payload, estado: payload.length ? 'ready' : 'empty', motivo: '' };
+  if (payload && Array.isArray(payload.latido)) {
+    return {
+      puntos: payload.latido,
+      estado: payload.estado || (payload.latido.length ? 'ready' : 'empty'),
+      motivo: payload.motivo ?? '',
+    };
+  }
+  return null;
+}
+
+async function loadLatido() {
+  if (!esVariable.value || !objectId.value) {
+    latido.value = { estado: 'idle', motivo: '', puntos: [] };
+    return;
+  }
+  latido.value = { estado: 'loading', motivo: '', puntos: [] };
+  try {
+    const directo = normalizarLatido(selectedObject.value?.latido);
+    if (directo) { latido.value = directo; return; }
+    for (const acceso of accesosLatido()) {
+      const respuesta = normalizarLatido(await catalog[acceso](objectId.value));
+      if (respuesta) { latido.value = respuesta; return; }
+    }
+    latido.value = { estado: 'empty', motivo: '', puntos: [] };
+  } catch (error) {
+    latido.value = { estado: 'empty', motivo: error?.message || '', puntos: [] };
+  }
 }
 
 // Único punto de carga: si mañana la fuente es la API, el resto de la vista no cambia.
@@ -95,6 +180,7 @@ async function loadCatalog() {
       : (objects.value[0]?.id ?? '');
 
     await loadFrames();
+    await loadLatido();
 
     const requestedFrame = Number(params.get('frame'));
     frameIndex.value = Number.isInteger(requestedFrame) && requestedFrame >= 0 && requestedFrame < frames.value.length
@@ -129,6 +215,7 @@ async function chooseObject(id) {
   playing.value = false;
   objectId.value = id;
   await loadFrames();
+  await loadLatido();
   frameIndex.value = 0;
 }
 
@@ -193,8 +280,9 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
         <section class="col-12 col-lg-9 viewer-column">
           <div v-if="ready" class="viewer panel">
             <div class="viewer-toolbar"><div><span class="eyebrow">CAMPO CELESTE <span class="toolbar-slash">/</span> {{ selectedObject.tag }}</span><h2>{{ selectedObject.name }}</h2></div><button class="share-button" @click="shareView"><i class="bi bi-share" /><span>Compartir vista</span></button></div>
-            <div class="sky-stage" :class="{ comparison: compare }">
-              <div class="image-layer" :style="{ backgroundImage: `url(${frame.url})` }" />
+            <div class="sky-stage" :class="{ comparison: compare, 'is-real': !frame.illustrative }">
+              <img v-if="!frame.illustrative" class="pixel-frame" :src="frame.url" :alt="`Recorte de ${selectedObject.name} del ${frame.date} en ${frame.band}`" />
+              <div v-else class="image-layer" :style="{ backgroundImage: `url(${frame.url})` }" />
               <div class="sky-vignette" />
               <div class="sky-grid" />
               <div class="image-caption"><span class="caption-dot" /> {{ frame.illustrative ? 'IMAGEN ILUSTRATIVA · DATOS REALES PENDIENTES' : 'DATOS DEL BACKEND' }}</div>
@@ -202,20 +290,37 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
               <div v-else class="coordinate-label"><i class="bi bi-hourglass-split" /> COORDENADAS PENDIENTES <span>/</span> NO VALIDADAS</div>
               <div class="target-marker"><span /><i /></div>
               <div class="target-label">OBJETO SELECCIONADO</div>
-              <div v-if="compare" class="compare-wipe" :style="{ backgroundImage: `url(${previousFrame.url})` }"><span class="wipe-label">ANTERIOR · {{ previousFrame.date }}{{ previousFrame.illustrative ? ' · ILUSTRATIVO' : '' }}</span><span class="wipe-line" /></div>
-              <div class="image-date"><span>{{ frame.date }}</span><small>{{ frame.band }}</small></div>
+              <div v-if="compare" class="compare-wipe" :class="{ 'is-real': !previousFrame.illustrative }" :style="previousFrame.illustrative ? { backgroundImage: `url(${previousFrame.url})` } : null"><img v-if="!previousFrame.illustrative" class="pixel-frame" :src="previousFrame.url" alt="" /><span class="wipe-label">ANTERIOR · {{ previousFrame.date }}{{ previousFrame.illustrative ? ' · ILUSTRATIVO' : '' }}</span><span class="wipe-line" /></div>
+              <div class="image-date"><span>{{ frame.date }}</span><small>{{ frame.band }}</small><small v-if="frame.calidadOk === false" class="frame-calidad">calidad marcada como dudosa por el backend</small></div>
             </div>
             <div class="timeline">
-              <div class="timeline-top"><span class="timeline-title"><i class="bi bi-clock-history" /> LÍNEA DE TIEMPO ILUSTRATIVA</span><span class="frame-counter">CUADRO <b>{{ String(frameIndex + 1).padStart(2, '0') }}</b> <span>/ {{ String(frames.length).padStart(2, '0') }}</span></span></div>
-              <input v-model.number="frameIndex" class="time-range" :style="{ '--progress': `${progressPercent}%` }" type="range" min="0" :max="frames.length - 1" step="1" aria-label="Elegir cuadro ilustrativo" />
+              <div class="timeline-top"><span class="timeline-title"><i class="bi bi-clock-history" /> {{ hayCuadrosReales ? 'LÍNEA DE TIEMPO' : 'LÍNEA DE TIEMPO ILUSTRATIVA' }}</span><span class="frame-counter">CUADRO <b>{{ String(frameIndex + 1).padStart(2, '0') }}</b> <span>/ {{ String(frames.length).padStart(2, '0') }}</span></span></div>
+              <input v-model.number="frameIndex" class="time-range" :style="{ '--progress': `${progressPercent}%` }" type="range" min="0" :max="frames.length - 1" step="1" aria-label="Elegir cuadro" />
               <div class="timeline-dates"><button v-for="(item, index) in frames" :key="item.date" class="date-tick" :class="{ current: index === frameIndex }" @click="frameIndex = index">{{ item.date.slice(5) }}</button></div>
             </div>
             <div class="player-controls"><div class="transport"><button class="control-button" aria-label="Cuadro anterior" @click="frameIndex = (frameIndex - 1 + frames.length) % frames.length"><i class="bi bi-skip-backward-fill" /></button><button class="play-button" :aria-label="playing ? 'Pausar' : 'Reproducir'" @click="playing = !playing"><i class="bi" :class="playing ? 'bi-pause-fill' : 'bi-play-fill'" /></button><button class="control-button" aria-label="Cuadro siguiente" @click="frameIndex = (frameIndex + 1) % frames.length"><i class="bi bi-skip-forward-fill" /></button><span class="play-caption">{{ playing ? 'REPRODUCIENDO' : 'RECORRER CUADROS' }}</span></div><button class="compare-button" :class="{ 'is-on': compare }" @click="compare = !compare"><i class="bi bi-layout-split" /> <span>{{ compare ? 'Cerrar comparación' : 'Antes y después' }}</span></button></div>
+          </div>
+          <div v-else-if="sinCuadros" class="viewer panel">
+            <div class="viewer-toolbar"><div><span class="eyebrow">CAMPO CELESTE <span class="toolbar-slash">/</span> {{ selectedObject.tag }}</span><h2>{{ selectedObject.name }}</h2></div><button class="share-button" @click="shareView"><i class="bi bi-share" /><span>Compartir vista</span></button></div>
+            <div class="viewer-empty">
+              <span class="viewer-empty-icon"><i class="bi bi-camera-video-off" /></span>
+              <div>
+                <h3>{{ tituloSinCuadros }}</h3>
+                <p v-if="motivoSinCuadros" class="viewer-empty-motivo">Motivo informado por el backend: {{ motivoSinCuadros }}</p>
+                <p v-else class="viewer-empty-motivo">El backend no informó un motivo. Preferimos no mostrar imágenes de relleno para que no se confundan con datos.</p>
+                <p class="viewer-empty-meta"><span class="viewer-empty-chip">{{ selectedObject.kind }}</span><span v-if="estadoSinCuadros" class="viewer-empty-chip">estado: {{ estadoSinCuadros }}</span><span v-if="selectedObject.coordinates" class="viewer-empty-chip">{{ selectedObject.coordinates.statusLabel }}</span></p>
+              </div>
+            </div>
           </div>
           <div v-else class="viewer panel">
             <div class="viewer-toolbar"><div><span class="eyebrow">CAMPO CELESTE</span><h2>{{ loading ? 'Cargando catálogo…' : 'Catálogo no disponible' }}</h2></div></div>
             <div class="sky-stage" style="display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center"><p style="max-width: 46ch; margin: 0; color: var(--text-secondary); font-size: 13px">{{ loadError || 'Preparando los objetos de demostración.' }}</p></div>
           </div>
+          <section v-if="esVariable && !loading && !loadError && selectedObject" class="latido-panel panel" aria-labelledby="latido-titulo">
+            <div class="latido-head"><div><span class="eyebrow">LATIDO</span><h2 id="latido-titulo">Curva de brillo</h2></div><span class="latido-chip">{{ selectedObject.tag }}</span></div>
+            <p class="latido-intro">Brillo por fecha, tal como lo entrega el backend. Nawi no recalcula ni corrige estos valores.</p>
+            <LatidoChart :puntos="latido.puntos" :nombre="selectedObject.name" :motivo="latido.motivo" :cargando="latido.estado === 'loading'" />
+          </section>
           <div class="below-viewer"><span><i class="bi bi-info-circle" /> {{ ready ? selectedObject.demoUse : 'Esta experiencia está en desarrollo.' }} <span class="caption-divider">·</span> {{ dataSourceNote }}</span><span class="keyboard-hint">NAVEGÁ CON <kbd>←</kbd> <kbd>→</kbd></span></div>
         </section>
       </div>
