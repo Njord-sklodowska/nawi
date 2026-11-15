@@ -149,7 +149,21 @@ const fichaTecnica = computed(() => {
 const esVariable = computed(() => selectedObject.value?.tag === 'VARIABLE' || selectedObject.value?.tipo === 'estrella_variable');
 // Objeto elegible pero sin cuadros: el visor debe decirlo, no quedar vacío.
 const sinCuadros = computed(() => !loading.value && !loadError.value && Boolean(selectedObject.value) && frames.value.length === 0);
-const motivoSinCuadros = computed(() => selectedObject.value?.motivo || framesInfo.value.motivo || '');
+/**
+ * Motivo que publica el backend sobre el objeto: no es un error de la app, es
+ * una limitación científica informada (núcleo saturado, señal muy débil…).
+ * El adaptador lo deja tal cual en `detalle.motivo`.
+ */
+const motivoBackend = computed(() => {
+  const motivo = detalle.value?.motivo;
+  return typeof motivo === 'string' ? motivo.trim() : '';
+});
+
+/** Con cuadros, la advertencia va en el visor. Sin cuadros, ya lo dice el panel vacío. */
+const motivoConCuadros = computed(() => (frames.value.length > 0 ? motivoBackend.value : ''));
+
+// Panel vacío: el motivo del backend (si existe) o el de la respuesta de cuadros.
+const motivoSinCuadros = computed(() => selectedObject.value?.motivo || motivoBackend.value || framesInfo.value.motivo || '');
 const estadoSinCuadros = computed(() => selectedObject.value?.estado || framesInfo.value.estado || '');
 const tituloSinCuadros = computed(() => (
   estadoSinCuadros.value === 'sin_datos'
@@ -242,7 +256,8 @@ function normalizarLatido(payload) {
     return {
       puntos: payload.latido,
       estado: payload.estado || (payload.latido.length ? 'ready' : 'empty'),
-      motivo: payload.motivo ?? '',
+      // `motivoLatido` es el mensaje de la curva; `motivo` es del objeto entero.
+      motivo: payload.motivoLatido ?? payload.motivo ?? '',
     };
   }
   return null;
@@ -407,6 +422,13 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
               <span v-if="marcadorReal" class="meta-chip"><i class="bi bi-crosshair2" /> cruz: posición esperada</span>
               <span v-if="trayectoria" class="meta-chip"><i class="bi bi-slash-lg" /> trayectoria: primer → último cuadro</span>
               <span class="meta-origen">según el backend</span>
+            </div>
+            <div v-if="motivoConCuadros" class="viewer-aviso" role="note">
+              <i class="bi bi-exclamation-triangle" aria-hidden="true" />
+              <div class="viewer-aviso-copy">
+                <span class="viewer-aviso-label">Advertencia del backend</span>
+                <p class="viewer-aviso-texto">{{ motivoConCuadros }}</p>
+              </div>
             </div>
             <div class="sky-stage" :class="{ comparison: compare, 'is-real': !frame.illustrative, 'is-suavizado': suavizado && !frame.illustrative }" :style="!frame.illustrative ? { '--zoom': zoomActivo } : null">
               <div v-if="!frame.illustrative" class="pixel-marco">

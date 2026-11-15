@@ -91,6 +91,32 @@ VITE_API_BASE=http://127.0.0.1:8010
   pantalla (no cae al mock ni inventa datos).
 - `.env.local` **no se versiona** (está en `.gitignore`). Solo se versiona `.env.example`.
 
+### Build de producción (datos reales)
+
+`.env.local` no se versiona ni lo lee la CI, así que el repo incluye **`.env.production`**
+(sí versionado) con:
+
+```dotenv
+VITE_NAWI_DATA_SOURCE=api
+VITE_API_BASE=http://127.0.0.1:8010
+```
+
+Con eso, `npm run build` compila apuntando a la API real y `npm run preview` sirve ese build.
+
+> **Antes de publicar en un servidor público**, `VITE_API_BASE` tiene que apuntar al backend
+> real (el de `127.0.0.1:8010` solo existe en la máquina de desarrollo):
+>
+> ```bash
+> VITE_API_BASE=https://api.tu-dominio npm run build
+> ```
+>
+> También se puede crear un `.env.production.local` (ignorado por git) con ese valor. El
+> backend, además, habilita CORS solo para los orígenes de desarrollo, así que hay que
+> agregar el dominio del frontend a `CORS_ALLOWED_ORIGINS`.
+>
+> **Precedencia de Vite:** `.env.local` se carga en todos los modos y gana sobre
+> `.env.production`. Si tenés un `.env.local` apuntando a otro backend, el build lo usa a él.
+
 ### Estado de la fuente (para la interfaz)
 
 `DATA_SOURCE_INFO` (en `src/data/catalog/sourceInfo.js`) es un store **reactivo** que refleja
@@ -155,8 +181,13 @@ valor falta, la interfaz lo dice ("Banda sin dato") en lugar de completarlo.
 | R Draconis | 12 | 4,42 – 4,81 μm | sin datos | mixta |
 
 - Total: **37 recortes**, todos de **58 × 58 px** con **6,15″ por píxel** (campo de 5,95′).
-- El visor avisa cuando el backend marca un cuadro con **calidad dudosa**.
-- `rastro`, `revelar` y `conocido` todavía vienen vacíos en los cinco objetos.
+- El visor avisa cuando el backend marca un cuadro con **calidad dudosa**, y los objetos traen
+  su motivo cuando corresponde: WISE 0855 es **señal débil (1–5 σ)** y en R Draconis el
+  **núcleo está saturado** y enmascarado.
+- **Rastro medido solo en Barnard**: 10,61 ± 0,23″ en 9 cuadros, frente a los 10,39″/año que
+  predice el catálogo, con una frase en lenguaje llano. El resto de los objetos no tiene
+  desplazamiento medido.
+- `revelar` y `conocido` todavía vienen vacíos en los cinco objetos.
 - `latido` (curva de brillo) hoy solo existe para **RW Aurigae**; cuando un objeto no tiene
   curva, el detalle responde `latido: []` y `latidoEstado: "sin_datos"` sin inventar puntos.
   Que el latido esté vacío **no** significa que el objeto no tenga datos: el `estado` del
