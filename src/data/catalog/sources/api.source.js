@@ -134,6 +134,51 @@ async function requestJson(path, descripcion) {
   return cuerpo;
 }
 
+function tieneAstrometria(objeto) {
+  return Number.isFinite(objeto?.ra_deg) && Number.isFinite(objeto?.dec_deg);
+}
+
+/**
+ * El listado del backend trae solo identidad y estado, sin coordenadas. La
+ * astrometría vive en /api/objetos/<slug>/catalogo/ (bloque `astrometria`).
+ * Para no mostrar "coordenadas pendientes" cuando el dato sí existe, se pide
+ * en paralelo solo a los objetos que no la traen. Si una consulta falla, ese
+ * objeto queda sin coordenadas: nunca se rellena con datos inventados.
+ */
+async function completarAstrometria(objetos) {
+  const pendientes = objetos.filter((o) => o?.slug && !tieneAstrometria(o));
+  if (!pendientes.length) return objetos;
+
+  const porSlug = new Map();
+  await Promise.all(pendientes.map(async (objeto) => {
+    try {
+      const ficha = await requestJson(
+        `/api/objetos/${encodeURIComponent(objeto.slug)}/catalogo/`,
+        `la astrometría de «${objeto.slug}»`,
+      );
+      const astrometria = ficha?.astrometria;
+      if (astrometria && Number.isFinite(astrometria.ra_deg)) porSlug.set(objeto.slug, astrometria);
+    } catch {
+      /* sin astrometría para ese objeto: la vista lo marcará como pendiente */
+    }
+  }));
+
+  if (!porSlug.size) return objetos;
+
+  return objetos.map((objeto) => {
+    const astrometria = porSlug.get(objeto.slug);
+    if (!astrometria) return objeto;
+    return {
+      ...objeto,
+      ra_deg: astrometria.ra_deg,
+      dec_deg: astrometria.dec_deg,
+      epoca: astrometria.fecha_referencia ?? astrometria.epoca ?? null,
+      pm_ra_cosdec_mas_yr: astrometria.pm_ra_cosdec_mas_yr,
+      pm_dec_mas_yr: astrometria.pm_dec_mas_yr,
+    };
+  });
+}
+
 export const apiSource = Object.freeze({
   mode: 'api',
   // La fuente es el backend real: lo que devuelve son sus datos. Si el backend
@@ -151,7 +196,7 @@ export const apiSource = Object.freeze({
       marcarContacto(false, mensaje);
       throw new Error(mensaje);
     }
-    return datos;
+    return completarAstrometria(datos);
   },
 
   /**
