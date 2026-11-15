@@ -123,10 +123,15 @@
   ],
   "latido": [],
   "rastro": {
-    "desplazamiento_arcsec": null,
-    "direccion_deg": null,
-    "incertidumbre_arcsec": null,
-    "pm_publicado_arcsec_yr": null
+    "desplazamiento_arcsec": 10.61,
+    "direccion_deg": 1.5,
+    "incertidumbre_arcsec": 0.23,
+    "pm_publicado_arcsec_yr": 10.393,
+    "pm_medido_arcsec_yr": 10.585,
+    "cuadros_usados": 9,
+    "fecha_inicio": "2025-08-15",
+    "fecha_fin": "2026-08-17",
+    "frase_simple": "Entre el 2025-08-15 y el 2026-08-17 (1.0 años), Estrella de Barnard se movió unos 10.6 segundos de arco hacia el norte, unas 1.7 veces el tamaño de un píxel de SPHEREx. El movimiento publicado predice 10.4 segundos de arco."
   },
   "revelar": {
     "snr_vs_cuadros": []
