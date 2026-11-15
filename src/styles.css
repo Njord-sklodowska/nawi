@@ -1298,16 +1298,30 @@ i.bi { line-height: 1; }
    Agregado por P5. Solo var(--token): ningún hex fuera de :root.
    ========================================================================== */
 
-/* Los recortes reales son de 58x58 px. Se muestran a escala entera
-   (58 * 8 = 464 px) con image-rendering: pixelated, así no aparecen ni
-   borrosos ni deformados por interpolación. */
+/* Los recortes reales son de 58x58 px: no hay más resolución en el dato, el
+   zoom solo agranda. El tamaño sale de escalas ENTERAS (--zoom: 1, 2, 4 u 8)
+   para que cada píxel del PNG ocupe un bloque exacto de pantalla: con escalas
+   fraccionarias unos bloques quedarían más anchos que otros (imagen deformada).
+   Por defecto 4x = 232 px, que entra también en pantallas chicas. */
+.pixel-marco {
+  position: relative;
+  width: calc(58px * var(--zoom, 4));
+  height: calc(58px * var(--zoom, 4));
+  line-height: 0;
+}
+
 .pixel-frame {
   display: block;
-  width: calc(58px * 8);
-  height: calc(58px * 8);
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  /* 'píxel real': vecino más cercano, sin tonos que el PNG no tenga. */
   image-rendering: pixelated;
 }
+
+/* Modo suavizado: el navegador interpola y aparecen tonos intermedios que el
+   dato no tiene. La interfaz lo rotula para que no se confunda con los píxeles
+   originales. Solo cambia el método de escalado: no toca el brillo del dato. */
+.sky-stage.is-suavizado .pixel-frame { image-rendering: auto; }
 
 /* Con datos reales el escenario pasa a cuadrado: el recorte se ve centrado y
    sin decoración que se pueda confundir con información (grilla, viñeta). */
@@ -1322,25 +1336,29 @@ i.bi { line-height: 1; }
 .sky-stage.is-real .sky-grid,
 .sky-stage.is-real .sky-vignette { display: none; }
 
-/* La mira del centro es decorativa: con datos reales todavía no hay centroide
-   medido, así que señalarla como si lo fuera sería mentir. */
-.sky-stage.is-real .target-marker,
-.sky-stage.is-real .target-label { display: none; }
+/* Ojo: en modo real la cruz NO se oculta. Solo se dibuja si el backend publicó
+   pos_esperada_px (ver App.vue), y va dentro del marco de la imagen para caer
+   sobre el píxel correcto con cualquier zoom. La mira decorativa del centro
+   solo existe en los cuadros ilustrativos. */
 
 .compare-wipe.is-real {
+  inset: 0;
+  clip-path: inset(0 50% 0 0);
+  border-right: 0;
   display: grid;
   place-items: center;
   background: var(--bg-void);
   filter: none;
 }
 
-@media (max-width: 991.98px) {
-  .pixel-frame { width: calc(58px * 5); height: calc(58px * 5); }
+/* Misma escala que la imagen principal, para que la comparación coincida píxel
+   a píxel con lo que queda debajo. */
+.compare-wipe.is-real .pixel-frame {
+  width: calc(58px * var(--zoom, 4));
+  height: calc(58px * var(--zoom, 4));
 }
 
-@media (max-width: 575.98px) {
-  .pixel-frame { width: calc(58px * 3); height: calc(58px * 3); }
-}
+.compare-wipe.is-real .wipe-line { right: auto; left: 50%; }
 
 .frame-calidad { color: var(--danger); }
 
@@ -1541,4 +1559,116 @@ i.bi { line-height: 1; }
   stroke-width: 1;
   stroke-opacity: 0.9;
   stroke-linecap: round;
+}
+
+/* --- Zoom del recorte real ------------------------------------------------ */
+/* La cruz de posición real (pos_esperada_px) se dibuja dentro del marco de la
+   imagen, con porcentajes de esa caja: así queda sobre el mismo píxel con
+   cualquier zoom. Acá solo se la achica, para que sea legible a 1x y no tape
+   el recorte a 8x. */
+.target-marker.is-real {
+  width: 22px;
+  height: 22px;
+  box-shadow: 0 0 12px var(--overlay-marker);
+}
+
+.target-marker.is-real::before { width: 30px; }
+.target-marker.is-real::after { height: 30px; }
+.target-marker.is-real span { width: 5px; height: 5px; box-shadow: 0 0 8px 2px var(--overlay-marker); }
+.target-marker.is-real i { inset: -4px; }
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.zoom-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 4px;
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.zoom-title i { font-size: 10px; color: var(--icon-info); }
+
+.zoom-button,
+.zoom-mode {
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font: 500 11px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.zoom-button:hover,
+.zoom-mode:hover {
+  border-color: var(--interactive-border);
+  color: var(--text-title);
+}
+
+/* Escala activa: es el indicador de "en qué zoom estoy". */
+.zoom-button.is-active {
+  border-color: var(--interactive-border);
+  background: var(--star-soft);
+  color: var(--text-title);
+}
+
+.zoom-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+
+.zoom-mode i { color: var(--icon-info); font-size: 11px; }
+
+.zoom-mode.is-suave {
+  border-color: var(--danger);
+  background: var(--mars-soft);
+  color: var(--text-title);
+}
+
+.zoom-mode.is-suave i { color: var(--danger); }
+
+/* Aviso de honestidad del modo interpolado, sobre la propia imagen. */
+.escala-aviso {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--overlay-img-strong);
+  backdrop-filter: blur(6px);
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--overlay-text);
+}
+
+.escala-aviso i { color: var(--danger); font-size: 10px; }
+
+@media (max-width: 680px) {
+  /* En mobile los controles de zoom bajan a su propia fila: no empujan los
+     botones de reproducción ni el de comparación fuera del panel. */
+  .player-controls { flex-wrap: wrap; }
+  .zoom-controls { order: 3; width: 100%; justify-content: flex-start; row-gap: 6px; }
+  .zoom-mode { margin-left: 0; }
+  .zoom-button,
+  .zoom-mode { height: 28px; padding: 0 8px; font-size: 10px; }
+  .escala-aviso { right: 10px; bottom: 12px; padding: 5px 7px; font-size: 8px; }
 }

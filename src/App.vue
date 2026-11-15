@@ -60,6 +60,20 @@ const filteredObjects = computed(() => objects.value.filter((item) => `${item.na
 const ready = computed(() => !loading.value && !loadError.value && Boolean(selectedObject.value) && Boolean(frame.value));
 const progressPercent = computed(() => (frames.value.length > 1 ? (frameIndex.value / (frames.value.length - 1)) * 100 : 0));
 
+// Zoom del recorte real. El PNG del backend son 58x58 px: no hay más detalle
+// que ese, así que el zoom solo agranda. Se ofrecen escalas ENTERAS para que
+// cada píxel del PNG caiga en un bloque exacto de pantalla (nunca fracciones,
+// que deforman el bloque). 4x = 232 px por defecto en escritorio; también entra
+// en pantallas chicas.
+const ZOOMS = [1, 2, 4, 8];
+const TAMANO_RECORTE_PX = 58;
+const zoom = ref(4);
+// 'píxel real' por defecto (vecino más cercano). 'suavizado' interpola y por eso
+// NO muestra los píxeles originales: la interfaz lo avisa en el visor.
+const suavizado = ref(false);
+const zoomActivo = computed(() => (ZOOMS.includes(zoom.value) ? zoom.value : 4));
+const zoomPx = computed(() => TAMANO_RECORTE_PX * zoomActivo.value);
+
 /**
  * Posición del objeto en el recorte, en porcentaje, a partir de
  * `pos_esperada_px` y el tamaño en píxeles del cuadro. Si el backend no los
@@ -338,19 +352,26 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
             <div class="viewer-toolbar"><div><span class="eyebrow">CAMPO CELESTE <span class="toolbar-slash">/</span> {{ selectedObject.tag }}</span><h2>{{ selectedObject.name }}</h2></div><button class="share-button" @click="shareView"><i class="bi bi-share" /><span>Compartir vista</span></button></div>
             <div v-if="fichaTecnica.length" class="viewer-meta" aria-label="Metadatos del recorte">
               <span v-for="chip in fichaTecnica" :key="chip" class="meta-chip"><i class="bi bi-rulers" /> {{ chip }}</span>
+              <span v-if="marcadorReal" class="meta-chip"><i class="bi bi-crosshair2" /> cruz: posición esperada</span>
               <span class="meta-origen">según el backend</span>
             </div>
-            <div class="sky-stage" :class="{ comparison: compare, 'is-real': !frame.illustrative }">
-              <img v-if="!frame.illustrative" class="pixel-frame" :src="frame.url" :alt="`Recorte de ${selectedObject.name} del ${frame.date} en ${frame.band}`" />
+            <div class="sky-stage" :class="{ comparison: compare, 'is-real': !frame.illustrative, 'is-suavizado': suavizado && !frame.illustrative }" :style="!frame.illustrative ? { '--zoom': zoomActivo } : null">
+              <div v-if="!frame.illustrative" class="pixel-marco">
+                <img class="pixel-frame" :src="frame.url" :alt="`Recorte de ${selectedObject.name} del ${frame.date} en ${frame.band}`" />
+                <div v-if="marcadorReal" class="target-marker is-real" :style="marcadorReal"><span /><i /></div>
+              </div>
               <div v-else class="image-layer" :style="{ backgroundImage: `url(${frame.url})` }" />
               <div class="sky-vignette" />
               <div class="sky-grid" />
               <div class="image-caption"><span class="caption-dot" /> {{ frame.illustrative ? 'IMAGEN ILUSTRATIVA · DATOS REALES PENDIENTES' : 'DATOS DEL BACKEND' }}</div>
               <div v-if="selectedObject.coordinates" class="coordinate-label" :title="selectedObject.coordinates.note"><i class="bi bi-exclamation-triangle" /> {{ selectedObject.coordinates.ra }} <span>/</span> {{ selectedObject.coordinates.dec }} · {{ selectedObject.coordinates.statusLabel }}</div>
               <div v-else class="coordinate-label"><i class="bi bi-hourglass-split" /> COORDENADAS PENDIENTES <span>/</span> NO VALIDADAS</div>
-              <div class="target-marker" :class="{ 'is-real': marcadorReal }" :style="marcadorReal"><span /><i /></div>
-              <div class="target-label" :class="{ 'is-real': marcadorReal }" :style="marcadorReal">{{ marcadorReal ? 'POSICIÓN DEL OBJETO' : 'OBJETO SELECCIONADO' }}</div>
+              <template v-if="frame.illustrative">
+                <div class="target-marker"><span /><i /></div>
+                <div class="target-label">OBJETO SELECCIONADO</div>
+              </template>
               <div v-if="compare" class="compare-wipe" :class="{ 'is-real': !previousFrame.illustrative }" :style="previousFrame.illustrative ? { backgroundImage: `url(${previousFrame.url})` } : null"><img v-if="!previousFrame.illustrative" class="pixel-frame" :src="previousFrame.url" alt="" /><span class="wipe-label">ANTERIOR · {{ previousFrame.date }}{{ previousFrame.illustrative ? ' · ILUSTRATIVO' : '' }}</span><span class="wipe-line" /></div>
+              <div v-if="!frame.illustrative && suavizado" class="escala-aviso"><i class="bi bi-water" /> interpolado · no son píxeles originales</div>
               <div class="image-date"><span>{{ frame.date }}</span><small>{{ frame.band }}</small><small v-if="frame.calidadOk === false" class="frame-calidad">calidad marcada como dudosa por el backend</small></div>
             </div>
             <div class="timeline">
@@ -358,7 +379,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown));
               <input v-model.number="frameIndex" class="time-range" :style="{ '--progress': `${progressPercent}%` }" type="range" min="0" :max="frames.length - 1" step="1" aria-label="Elegir cuadro" />
               <div class="timeline-dates"><button v-for="(item, index) in frames" :key="item.date" class="date-tick" :class="{ current: index === frameIndex }" @click="frameIndex = index">{{ item.date.slice(5) }}</button></div>
             </div>
-            <div class="player-controls"><div class="transport"><button class="control-button" aria-label="Cuadro anterior" @click="frameIndex = (frameIndex - 1 + frames.length) % frames.length"><i class="bi bi-skip-backward-fill" /></button><button class="play-button" :aria-label="playing ? 'Pausar' : 'Reproducir'" @click="playing = !playing"><i class="bi" :class="playing ? 'bi-pause-fill' : 'bi-play-fill'" /></button><button class="control-button" aria-label="Cuadro siguiente" @click="frameIndex = (frameIndex + 1) % frames.length"><i class="bi bi-skip-forward-fill" /></button><span class="play-caption">{{ playing ? 'REPRODUCIENDO' : 'RECORRER CUADROS' }}</span></div><button class="compare-button" :class="{ 'is-on': compare }" @click="compare = !compare"><i class="bi bi-layout-split" /> <span>{{ compare ? 'Cerrar comparación' : 'Antes y después' }}</span></button></div>
+            <div class="player-controls"><div class="transport"><button class="control-button" aria-label="Cuadro anterior" @click="frameIndex = (frameIndex - 1 + frames.length) % frames.length"><i class="bi bi-skip-backward-fill" /></button><button class="play-button" :aria-label="playing ? 'Pausar' : 'Reproducir'" @click="playing = !playing"><i class="bi" :class="playing ? 'bi-pause-fill' : 'bi-play-fill'" /></button><button class="control-button" aria-label="Cuadro siguiente" @click="frameIndex = (frameIndex + 1) % frames.length"><i class="bi bi-skip-forward-fill" /></button><span class="play-caption">{{ playing ? 'REPRODUCIENDO' : 'RECORRER CUADROS' }}</span></div><div v-if="!frame.illustrative" class="zoom-controls" role="group" aria-label="Zoom del recorte y método de escalado"><span class="zoom-title" aria-hidden="true"><i class="bi bi-arrows-angle-expand" /> zoom</span><button v-for="escala in ZOOMS" :key="escala" type="button" class="zoom-button" :class="{ 'is-active': zoomActivo === escala }" :aria-pressed="zoomActivo === escala" :aria-label="`Escala ${escala}x: recorte a ${TAMANO_RECORTE_PX * escala} píxeles`" :title="`${escala}x · ${TAMANO_RECORTE_PX * escala} px`" @click="zoom = escala">{{ escala }}x</button><button type="button" class="zoom-mode" :class="{ 'is-suave': suavizado }" :aria-pressed="suavizado" :aria-label="suavizado ? 'Modo suavizado activo: la imagen está interpolada y no muestra los píxeles originales. Cambiar a píxel real.' : 'Modo píxel real activo. Cambiar a suavizado, que interpola la imagen.'" :title="suavizado ? 'Interpolado: no son los píxeles originales' : 'Píxeles originales del recorte, sin interpolar'" @click="suavizado = !suavizado"><i class="bi" :class="suavizado ? 'bi-water' : 'bi-grid-3x3-gap-fill'" /><span>{{ suavizado ? 'suavizado' : 'píxel real' }}</span></button></div><button class="compare-button" :class="{ 'is-on': compare }" @click="compare = !compare"><i class="bi bi-layout-split" /> <span>{{ compare ? 'Cerrar comparación' : 'Antes y después' }}</span></button></div>
           </div>
           <div v-else-if="sinCuadros" class="viewer panel">
             <div class="viewer-toolbar"><div><span class="eyebrow">CAMPO CELESTE <span class="toolbar-slash">/</span> {{ selectedObject.tag }}</span><h2>{{ selectedObject.name }}</h2></div><button class="share-button" @click="shareView"><i class="bi bi-share" /><span>Compartir vista</span></button></div>
