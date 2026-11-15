@@ -3,8 +3,8 @@
   "nombre": "Estrella de Barnard",
   "tipo": "estrella_movimiento_propio",
   "centro": {
-    "ra_deg": 269.4461,
-    "dec_deg": 4.7704
+    "ra_deg": 269.446267,
+    "dec_deg": 4.768222
   },
   "fov_arcmin": 5.95,
   "pixel_arcsec": 6.15,
@@ -15,72 +15,110 @@
     {
       "fecha": "2025-08-15T20:46:08Z",
       "url": "/media/barnard/frames/0000.png",
-      "longitud_onda_um": null,
+      "longitud_onda_um": 4.923,
+      "ancho_banda_um": 0.0369,
       "calidad_ok": true,
       "pos_esperada_px": {
-        "x": 28.35,
-        "y": 30.42
-      }
+        "x": 28.45,
+        "y": 29.14
+      },
+      "snr_en_posicion": 14656.5
     },
     {
       "fecha": "2025-08-18T20:29:38Z",
       "url": "/media/barnard/frames/0001.png",
-      "longitud_onda_um": null,
+      "longitud_onda_um": 4.4778,
+      "ancho_banda_um": 0.0355,
       "calidad_ok": true,
       "pos_esperada_px": {
-        "x": 28.35,
-        "y": 30.41
-      }
+        "x": 28.45,
+        "y": 29.12
+      },
+      "snr_en_posicion": 20152.6
     },
     {
       "fecha": "2025-08-25T00:50:31Z",
       "url": "/media/barnard/frames/0002.png",
-      "longitud_onda_um": null,
+      "longitud_onda_um": 4.7133,
+      "ancho_banda_um": 0.037,
       "calidad_ok": true,
       "pos_esperada_px": {
-        "x": 28.36,
-        "y": 30.38
-      }
+        "x": 28.45,
+        "y": 29.1
+      },
+      "snr_en_posicion": 20536.9
     },
     {
       "fecha": "2026-03-19T07:26:15Z",
       "url": "/media/barnard/frames/0003.png",
-      "longitud_onda_um": null,
+      "longitud_onda_um": 4.5482,
+      "ancho_banda_um": 0.0359,
       "calidad_ok": true,
       "pos_esperada_px": {
-        "x": 28.43,
-        "y": 29.43
-      }
+        "x": 28.53,
+        "y": 28.14
+      },
+      "snr_en_posicion": 20500.5
     },
     {
       "fecha": "2026-03-23T15:42:54Z",
       "url": "/media/barnard/frames/0004.png",
-      "longitud_onda_um": null,
+      "longitud_onda_um": 4.3944,
+      "ancho_banda_um": 0.0378,
       "calidad_ok": true,
       "pos_esperada_px": {
-        "x": 28.43,
-        "y": 29.41
-      }
+        "x": 28.53,
+        "y": 28.12
+      },
+      "snr_en_posicion": 15408.4
     },
     {
       "fecha": "2026-04-10T00:44:14Z",
       "url": "/media/barnard/frames/0005.png",
-      "longitud_onda_um": null,
+      "longitud_onda_um": 4.5487,
+      "ancho_banda_um": 0.0358,
       "calidad_ok": true,
       "pos_esperada_px": {
-        "x": 28.44,
-        "y": 29.33
-      }
+        "x": 28.54,
+        "y": 28.04
+      },
+      "snr_en_posicion": 19095.1
     },
     {
       "fecha": "2026-05-04T03:12:40Z",
       "url": "/media/barnard/frames/0006.png",
-      "longitud_onda_um": null,
+      "longitud_onda_um": 4.7884,
+      "ancho_banda_um": 0.0372,
       "calidad_ok": true,
       "pos_esperada_px": {
-        "x": 28.45,
-        "y": 29.22
-      }
+        "x": 28.54,
+        "y": 27.93
+      },
+      "snr_en_posicion": 18401.2
+    },
+    {
+      "fecha": "2026-08-16T15:09:19Z",
+      "url": "/media/barnard/frames/0007.png",
+      "longitud_onda_um": 4.4296,
+      "ancho_banda_um": 0.0364,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.58,
+        "y": 27.45
+      },
+      "snr_en_posicion": 17227.0
+    },
+    {
+      "fecha": "2026-08-17T00:49:04Z",
+      "url": "/media/barnard/frames/0008.png",
+      "longitud_onda_um": 4.4617,
+      "ancho_banda_um": 0.0359,
+      "calidad_ok": true,
+      "pos_esperada_px": {
+        "x": 28.58,
+        "y": 27.45
+      },
+      "snr_en_posicion": 15725.6
     }
   ],
   "latido": [],
