@@ -12,7 +12,7 @@ pos = SkyCoord(269.4461*u.deg, 4.7704*u.deg)
 def consultar(col, intentos=4):
     for i in range(intentos):
         try:
-            return Irsa.query_sia(pos=(pos, 0.1*u.deg), collection=col)
+            return Irsa.query_sia(pos=(pos, 0.01*u.deg), collection=col)
         except Exception as e:
             print(f"  intento {i+1} falló: {str(e)[:80]}")
             time.sleep(20)
